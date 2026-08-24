@@ -1,10 +1,8 @@
-import Link from 'next/link';
 import { getEventSettings, computeRegistrationWindowState } from '@/lib/settings';
 import { getQuotaOverview } from '@/lib/quota';
 import { sweepExpiredReservations } from '@/lib/workflow';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { RegistrationWizard } from '@/components/register/RegistrationWizard';
+import { RegistrationClosedNotice } from '@/components/register/RegistrationClosedNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,25 +13,7 @@ export default async function RegisterPage() {
   const quotas = await getQuotaOverview();
 
   if (windowState !== 'OPEN') {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-5 py-16">
-        <Card className="max-w-md text-center space-y-3">
-          <h1 className="text-xl font-bold text-ink">
-            {windowState === 'UPCOMING' ? 'Registration Opens Soon' : 'Registration Closed'}
-          </h1>
-          <p className="text-gray-500">
-            {windowState === 'UPCOMING'
-              ? 'ระบบจะเปิดรับสมัครวันที่ 13 กันยายน 2026 กรุณากลับมาใหม่อีกครั้ง'
-              : 'ขณะนี้ปิดรับสมัครแล้ว ขอบคุณที่ให้ความสนใจ ECB Fun Run 2026'}
-          </p>
-          <Link href="/">
-            <Button variant="outline" fullWidth>
-              กลับหน้าแรก
-            </Button>
-          </Link>
-        </Card>
-      </main>
-    );
+    return <RegistrationClosedNotice state={windowState} />;
   }
 
   return (
@@ -53,11 +33,6 @@ export default async function RegisterPage() {
           promptPayNumber: settings.promptPayNumber,
           promptPayQrImageUrl: settings.promptPayQrImageUrl,
           paymentInstructions: settings.paymentInstructions,
-        }}
-        consentText={{
-          health: settings.consentTextHealth,
-          marketing: settings.consentTextMarketing,
-          communication: settings.consentTextCommunication,
         }}
       />
     </main>

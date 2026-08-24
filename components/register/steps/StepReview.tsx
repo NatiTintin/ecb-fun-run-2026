@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { DISTANCE_LABEL, PARTICIPANT_TYPE_LABEL, Distance, ParticipantType } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
 import { RegistrationDraft, PricingInfo, priceFor } from '@/components/register/types';
@@ -15,6 +16,9 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 export function StepReview({ draft, pricing }: { draft: RegistrationDraft; pricing: PricingInfo }) {
+  const { dict } = useLanguage();
+  const t = dict.register.review;
+
   const fee =
     draft.distance && draft.participantType
       ? priceFor(pricing, draft.distance as Distance, draft.participantType as ParticipantType)
@@ -24,37 +28,43 @@ export function StepReview({ draft, pricing }: { draft: RegistrationDraft; prici
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-extrabold text-ink">ตรวจสอบข้อมูลก่อนสมัคร</h2>
-        <p className="text-sm text-gray-500">Review your registration</p>
+        <h2 className="text-xl font-extrabold text-ink">{t.heading}</h2>
+        <p className="text-sm text-gray-500">{t.subheading}</p>
       </div>
 
       <Card>
-        <h3 className="font-bold text-ink mb-1">ข้อมูลผู้สมัคร</h3>
-        <Row label="ชื่อ-นามสกุล" value={draft.fullName} />
-        <Row label="เบอร์โทรศัพท์" value={draft.phone} />
-        <Row label="อีเมล" value={draft.email} />
+        <h3 className="font-bold text-ink mb-1">{t.participantSection}</h3>
+        <Row label={t.fullName} value={draft.fullName} />
+        <Row label={t.phone} value={draft.phone} />
+        <Row label={t.email} value={draft.email} />
       </Card>
 
       <Card>
-        <h3 className="font-bold text-ink mb-1">รายการแข่งขัน</h3>
-        <Row label="ประเภท" value={draft.participantType ? PARTICIPANT_TYPE_LABEL[draft.participantType] : '-'} />
-        <Row label="ระยะ" value={draft.distance ? DISTANCE_LABEL[draft.distance] : '-'} />
-        <Row label="ขนาดเสื้อ" value={draft.shirtSize ?? '-'} />
-        <Row label="ค่าสมัคร" value={formatTHB(fee)} />
+        <h3 className="font-bold text-ink mb-1">{t.raceSection}</h3>
+        <Row label={t.type} value={draft.participantType ? PARTICIPANT_TYPE_LABEL[draft.participantType] : '-'} />
+        <Row label={t.distance} value={draft.distance ? DISTANCE_LABEL[draft.distance] : '-'} />
+        <Row label={t.shirtSize} value={draft.shirtSize ?? '-'} />
+        <Row label={t.fee} value={formatTHB(fee)} />
       </Card>
 
       <Card>
-        <h3 className="font-bold text-ink mb-1">สุขภาพและความยินยอม</h3>
-        <Row label="PAR-Q" value={hasHealthFlag ? 'มีข้อควรระวัง (รับทราบแล้ว)' : 'ไม่มีข้อควรระวัง'} />
-        <Row label="Health Consent" value={draft.healthConsent === 'CONSENT' ? 'ยินยอม' : 'ไม่ยินยอม'} />
-        <Row label="Marketing Consent" value={draft.marketingConsent === 'CONSENT' ? 'ยินยอม' : 'ไม่ยินยอม'} />
-        <Row label="Communication Consent" value={draft.communicationConsent === 'CONSENT' ? 'ยินยอม' : 'ไม่ยินยอม'} />
-        <p className="text-xs text-gray-400 mt-1">รายละเอียดคำตอบ PAR-Q เป็นข้อมูลสุขภาพที่ละเอียดอ่อน จะไม่แสดงซ้ำในหน้านี้</p>
+        <h3 className="font-bold text-ink mb-1">{t.healthSection}</h3>
+        <Row label={t.parq} value={hasHealthFlag ? t.parqFlagged : t.parqClear} />
+        <Row label={t.healthConsent} value={draft.healthConsent === 'CONSENT' ? t.consented : t.notConsented} />
+        <Row label={t.marketingConsent} value={draft.marketingConsent === 'CONSENT' ? t.consented : t.notConsented} />
+        <Row
+          label={t.communicationConsent}
+          value={draft.communicationConsent === 'CONSENT' ? t.consented : t.notConsented}
+        />
+        <p className="text-xs text-gray-400 mt-1">{t.parqSensitiveNote}</p>
       </Card>
 
       <Card>
-        <h3 className="font-bold text-ink mb-1">การชำระเงิน</h3>
-        <Row label="หลักฐานการโอนเงิน" value={draft.slip ? `แนบแล้ว (${draft.slip.name})` : 'ยังไม่ได้แนบ — แนบภายหลังได้'} />
+        <h3 className="font-bold text-ink mb-1">{t.paymentSection}</h3>
+        <Row
+          label={t.slipStatus}
+          value={draft.slip ? t.slipAttached.replace('{name}', draft.slip.name) : t.slipNotAttached}
+        />
       </Card>
     </div>
   );

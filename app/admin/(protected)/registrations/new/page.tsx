@@ -31,11 +31,6 @@ export default async function NewRegistrationPage() {
           promptPayQrImageUrl: settings.promptPayQrImageUrl,
           paymentInstructions: settings.paymentInstructions,
         }}
-        consentText={{
-          health: settings.consentTextHealth,
-          marketing: settings.consentTextMarketing,
-          communication: settings.consentTextCommunication,
-        }}
         submitFn={createManualRegistrationAction}
       />
     </div>

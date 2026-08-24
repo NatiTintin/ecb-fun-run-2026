@@ -3,14 +3,9 @@
 import { useState, useTransition } from 'react';
 import { participantInfoSchema, shirtSizeSchema } from '@/lib/validation';
 import { submitRegistrationAction } from '@/lib/actions/publicRegistration';
-import {
-  RegistrationDraft,
-  emptyDraft,
-  QuotaOverviewItem,
-  PricingInfo,
-  PaymentInfo,
-  ConsentTextInfo,
-} from '@/components/register/types';
+import { useLanguage } from '@/lib/i18n/LanguageProvider';
+import { Dictionary } from '@/lib/i18n/dictionaries';
+import { RegistrationDraft, emptyDraft, QuotaOverviewItem, PricingInfo, PaymentInfo } from '@/components/register/types';
 import { StepIndicator } from '@/components/register/StepIndicator';
 import { StepDetails } from '@/components/register/steps/StepDetails';
 import { StepRace } from '@/components/register/steps/StepRace';
@@ -23,7 +18,7 @@ import { Button } from '@/components/ui/Button';
 
 const QUESTION_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'] as const;
 
-function validateStep(step: number, draft: RegistrationDraft): Record<string, string> {
+function validateStep(step: number, draft: RegistrationDraft, dict: Dictionary): Record<string, string> {
   const errors: Record<string, string> = {};
 
   if (step === 1) {
@@ -31,42 +26,47 @@ function validateStep(step: number, draft: RegistrationDraft): Record<string, st
       .pick({ fullName: true, phone: true, email: true })
       .safeParse({ fullName: draft.fullName, phone: draft.phone, email: draft.email });
     if (!result.success) {
-      for (const issue of result.error.issues) errors[String(issue.path[0])] = issue.message;
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]) as 'fullName' | 'phone' | 'email';
+        errors[field] = dict.register.details.errors[field];
+      }
     }
   }
 
   if (step === 2) {
-    if (!draft.participantType) errors.participantType = 'กรุณาเลือกประเภทผู้สมัคร';
-    if (!draft.distance) errors.distance = 'กรุณาเลือกระยะการวิ่ง';
+    if (!draft.participantType) errors.participantType = dict.register.race.errors.participantType;
+    if (!draft.distance) errors.distance = dict.register.race.errors.distance;
   }
 
   if (step === 3) {
     const result = shirtSizeSchema.safeParse({ shirtSize: draft.shirtSize });
-    if (!result.success) errors.shirtSize = 'กรุณาเลือกขนาดเสื้อ';
+    if (!result.success) errors.shirtSize = dict.register.shirt.errors.shirtSize;
   }
 
   if (step === 4) {
+    const he = dict.register.health.errors;
     for (const key of QUESTION_KEYS) {
-      if (draft.parq[key] === null) errors[key] = 'กรุณาตอบคำถามข้อนี้';
+      if (draft.parq[key] === null) errors[key] = he.answerRequired;
     }
     const hasHealthFlag = QUESTION_KEYS.some((k) => draft.parq[k] === true);
     if (hasHealthFlag && !draft.parqAcknowledged) {
-      errors.parqAcknowledged = 'กรุณายืนยันว่ารับทราบคำแนะนำ';
+      errors.parqAcknowledged = he.ackRequired;
     }
-    if (!draft.healthConsent) errors.healthConsent = 'กรุณาเลือกตัวเลือกความยินยอม';
+    if (!draft.healthConsent) errors.healthConsent = he.healthConsentRequired;
     else if (draft.healthConsent === 'NO_CONSENT') {
-      errors.healthConsent = 'จำเป็นต้องยินยอมให้เก็บข้อมูลสุขภาพเพื่อความปลอดภัยในการเข้าร่วมกิจกรรม';
+      errors.healthConsent = he.healthConsentMandatory;
     }
-    if (!draft.marketingConsent) errors.marketingConsent = 'กรุณาเลือกตัวเลือกความยินยอม';
-    if (!draft.communicationConsent) errors.communicationConsent = 'กรุณาเลือกตัวเลือกความยินยอม';
-    if (!draft.declarationAccepted) errors.declarationAccepted = 'กรุณายืนยันคำรับรองก่อนดำเนินการต่อ';
+    if (!draft.marketingConsent) errors.marketingConsent = he.marketingConsentRequired;
+    if (!draft.communicationConsent) errors.communicationConsent = he.communicationConsentRequired;
+    if (!draft.declarationAccepted) errors.declarationAccepted = he.declarationRequired;
   }
 
   return errors;
 }
 
-function buildFormData(draft: RegistrationDraft): FormData {
+function buildFormData(draft: RegistrationDraft, locale: string): FormData {
   const fd = new FormData();
+  fd.set('locale', locale);
   fd.set('fullName', draft.fullName);
   fd.set('phone', draft.phone);
   fd.set('email', draft.email);
@@ -91,17 +91,16 @@ export function RegistrationWizard({
   quotas,
   pricing,
   payment,
-  consentText,
   submitFn = submitRegistrationAction,
   successHrefBase = '/status',
 }: {
   quotas: QuotaOverviewItem[];
   pricing: PricingInfo;
   payment: PaymentInfo;
-  consentText: ConsentTextInfo;
   submitFn?: (formData: FormData) => Promise<WizardSubmitResult>;
   successHrefBase?: string;
 }) {
+  const { dict, locale } = useLanguage();
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<RegistrationDraft>(emptyDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,7 +113,7 @@ export function RegistrationWizard({
   }
 
   function goNext() {
-    const stepErrors = validateStep(step, draft);
+    const stepErrors = validateStep(step, draft, dict);
     setErrors(stepErrors);
     if (Object.keys(stepErrors).length > 0) return;
     setStep((s) => Math.min(6, s + 1));
@@ -129,7 +128,7 @@ export function RegistrationWizard({
   function handleSubmit() {
     setSubmitError(null);
     startTransition(async () => {
-      const res = await submitFn(buildFormData(draft));
+      const res = await submitFn(buildFormData(draft, locale));
       if (res.ok) {
         setResult({ registrationId: res.registrationId, statusToken: res.statusToken });
       } else {
@@ -156,9 +155,7 @@ export function RegistrationWizard({
         {step === 1 && <StepDetails draft={draft} update={update} errors={errors} />}
         {step === 2 && <StepRace draft={draft} update={update} errors={errors} quotas={quotas} pricing={pricing} />}
         {step === 3 && <StepShirt draft={draft} update={update} errors={errors} />}
-        {step === 4 && (
-          <StepHealthConsent draft={draft} update={update} errors={errors} consentText={consentText} />
-        )}
+        {step === 4 && <StepHealthConsent draft={draft} update={update} errors={errors} />}
         {step === 5 && <StepPayment draft={draft} update={update} errors={errors} payment={payment} pricing={pricing} />}
         {step === 6 && <StepReview draft={draft} pricing={pricing} />}
 
@@ -171,16 +168,16 @@ export function RegistrationWizard({
         <div className="mt-8 flex gap-3">
           {step > 1 && (
             <Button variant="outline" size="lg" onClick={goBack} disabled={isPending}>
-              ย้อนกลับ
+              {dict.common.back}
             </Button>
           )}
           {step < 6 ? (
             <Button size="lg" fullWidth onClick={goNext}>
-              ถัดไป
+              {dict.common.next}
             </Button>
           ) : (
             <Button size="lg" fullWidth onClick={handleSubmit} disabled={isPending}>
-              {isPending ? 'กำลังส่งข้อมูล...' : 'ยืนยันการสมัคร / Submit'}
+              {isPending ? dict.register.review.submitting : dict.register.review.submit}
             </Button>
           )}
         </div>

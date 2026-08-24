@@ -123,9 +123,11 @@ export function SettingsForm({ settings, quotas }: { settings: EventSettings; qu
 
       <Section title="Consent">
         <TextField label="Consent Policy Version" name="consentPolicyVersion" defaultValue={settings.consentPolicyVersion} />
-        <TextAreaField label="Health Consent Text" name="consentTextHealth" defaultValue={settings.consentTextHealth} />
-        <TextAreaField label="Marketing Consent Text" name="consentTextMarketing" defaultValue={settings.consentTextMarketing} />
-        <TextAreaField label="Communication Consent Text" name="consentTextCommunication" defaultValue={settings.consentTextCommunication} />
+        <p className="text-xs text-gray-500">
+          The consent wording shown to participants is fixed, bilingual legal copy (see
+          lib/i18n/dictionaries.ts) so it stays consistent in both languages — only the policy
+          version number is editable here, for audit-trail purposes.
+        </p>
       </Section>
 
       {state?.error && <p className="text-sm font-medium text-red-600">{state.error}</p>}

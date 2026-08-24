@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { ALLOWED_SLIP_MIME_TYPES, MAX_SLIP_SIZE_BYTES, Distance, ParticipantType } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
 import { RegistrationDraft, PaymentInfo, PricingInfo, priceFor } from '@/components/register/types';
@@ -19,6 +20,8 @@ export function StepPayment({
   payment: PaymentInfo;
   pricing: PricingInfo;
 }) {
+  const { dict } = useLanguage();
+  const t = dict.register.payment;
   const [preview, setPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
 
@@ -43,11 +46,11 @@ export function StepPayment({
       return;
     }
     if (!ALLOWED_SLIP_MIME_TYPES.includes(file.type)) {
-      setFileError('รองรับเฉพาะไฟล์ JPG, PNG หรือ PDF เท่านั้น');
+      setFileError(t.slipTypeError);
       return;
     }
     if (file.size > MAX_SLIP_SIZE_BYTES) {
-      setFileError('ขนาดไฟล์ต้องไม่เกิน 8 MB');
+      setFileError(t.slipSizeError);
       return;
     }
     update({ slip: file });
@@ -58,22 +61,34 @@ export function StepPayment({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-extrabold text-ink">ชำระเงิน</h2>
-        <p className="text-sm text-gray-500">Payment</p>
+        <h2 className="text-xl font-extrabold text-ink">{t.heading}</h2>
+        <p className="text-sm text-gray-500">{t.subheading}</p>
       </div>
 
       <Card className="bg-brand-50 border-brand-200">
-        <p className="text-sm text-gray-600">Registration Fee</p>
+        <p className="text-sm text-gray-600">{t.registrationFee}</p>
         <p className="text-3xl font-extrabold text-brand-600">{formatTHB(fee)}</p>
       </Card>
 
       <Card className="space-y-2">
-        <h3 className="font-bold text-ink">ข้อมูลการโอนเงิน / Bank Transfer Information</h3>
+        <h3 className="font-bold text-ink">{t.bankInfo}</h3>
         {hasBankInfo ? (
           <div className="text-sm space-y-1 text-gray-700">
-            {payment.bankName && <p>ธนาคาร: {payment.bankName}</p>}
-            {payment.bankAccountName && <p>ชื่อบัญชี: {payment.bankAccountName}</p>}
-            {payment.bankAccountNumber && <p>เลขบัญชี: {payment.bankAccountNumber}</p>}
+            {payment.bankName && (
+              <p>
+                {t.bank}: {payment.bankName}
+              </p>
+            )}
+            {payment.bankAccountName && (
+              <p>
+                {t.accountName}: {payment.bankAccountName}
+              </p>
+            )}
+            {payment.bankAccountNumber && (
+              <p>
+                {t.accountNumber}: {payment.bankAccountNumber}
+              </p>
+            )}
             {payment.promptPayNumber && <p>PromptPay: {payment.promptPayNumber}</p>}
             {payment.promptPayQrImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -88,15 +103,13 @@ export function StepPayment({
             )}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
-            เจ้าหน้าที่กำลังเตรียมข้อมูลบัญชีสำหรับการโอนเงิน กรุณาดำเนินการสมัครต่อได้ก่อน แล้วท่านสามารถแนบหลักฐานการชำระเงินภายหลังผ่านหน้าสถานะการสมัคร
-          </p>
+          <p className="text-sm text-gray-500">{t.noBankInfo}</p>
         )}
       </Card>
 
       <Card className="space-y-3">
-        <h3 className="font-bold text-ink">แนบหลักฐานการโอนเงิน / Payment Slip</h3>
-        <p className="text-xs text-gray-500">รองรับ JPG, PNG, PDF ขนาดไม่เกิน 8 MB (สามารถแนบภายหลังได้)</p>
+        <h3 className="font-bold text-ink">{t.slipHeading}</h3>
+        <p className="text-xs text-gray-500">{t.slipHint}</p>
         <input
           type="file"
           accept="image/jpeg,image/png,image/jpg,application/pdf"
@@ -117,7 +130,9 @@ export function StepPayment({
             )}
             <div className="min-w-0">
               <p className="text-sm font-medium text-ink truncate">{draft.slip.name}</p>
-              <p className="text-xs text-gray-500">{(draft.slip.size / 1024).toFixed(0)} KB · พร้อมแนบ</p>
+              <p className="text-xs text-gray-500">
+                {(draft.slip.size / 1024).toFixed(0)} KB · {t.slipReady}
+              </p>
             </div>
           </div>
         )}

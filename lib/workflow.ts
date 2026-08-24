@@ -11,6 +11,7 @@ import {
 import { statusUrlFor } from '@/lib/registration';
 import { Distance, ParticipantType, RegistrationStatus } from '@/lib/config';
 import { getEventSettings } from '@/lib/settings';
+import { Locale } from '@/lib/i18n/dictionaries';
 
 export class WorkflowError extends Error {}
 
@@ -70,6 +71,7 @@ export async function flagPaymentIssue(participantId: string, adminId: string, r
   });
 
   const { subject, html } = paymentIssueEmail({
+    locale: participant.preferredLocale as Locale,
     fullName: participant.fullName,
     registrationId: participant.registrationId,
     reason,
@@ -101,6 +103,7 @@ export async function sendPaymentReminder(participantId: string, adminId: string
   }
 
   const { subject, html } = paymentReminderEmail({
+    locale: participant.preferredLocale as Locale,
     fullName: participant.fullName,
     registrationId: participant.registrationId,
     fee: participant.registrationFee,
@@ -151,6 +154,7 @@ export async function approveRegistration(participantId: string, adminId: string
 
   const qrDataUrl = await qrCodeDataUrl(token);
   const { subject, html } = registrationApprovedEmail({
+    locale: participant.preferredLocale as Locale,
     fullName: participant.fullName,
     registrationId: participant.registrationId,
     distance: participant.distance as Distance,

@@ -1,19 +1,25 @@
+'use client';
+
+import { useLanguage } from '@/lib/i18n/LanguageProvider';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { cn } from '@/lib/utils';
 
-const STEP_LABELS = ['Details', 'Race', 'Shirt', 'Health & Consent', 'Payment', 'Review'];
-
 export function StepIndicator({ step }: { step: number }) {
+  const { dict } = useLanguage();
+  const labels = dict.register.steps;
+
   return (
     <div className="sticky top-0 z-10 bg-cream/95 backdrop-blur border-b border-gray-100 px-4 py-3">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1.5">
-          <span>
-            ขั้นตอนที่ {step} จาก {STEP_LABELS.length}
+        <div className="flex items-center justify-between gap-3 text-xs font-semibold text-gray-500 mb-1.5">
+          <span className="whitespace-nowrap">
+            {dict.register.stepOf.replace('{current}', String(step)).replace('{total}', String(labels.length))}
           </span>
-          <span className="text-brand-600">{STEP_LABELS[step - 1]}</span>
+          <span className="text-brand-600 truncate">{labels[step - 1]}</span>
+          <LanguageSwitcher tone="light" className="flex-shrink-0" />
         </div>
         <div className="flex gap-1.5">
-          {STEP_LABELS.map((label, i) => (
+          {labels.map((label, i) => (
             <div
               key={label}
               className={cn(

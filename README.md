@@ -1,8 +1,9 @@
 # ECB Fun Run 2026 — Registration System
 
 Production-ready, mobile-first registration platform for **ECB Fun Run 2026** (Saturday, 7 November
-2026). Thai-first UI, English secondary. Covers the full participant journey — register, pay, get
-reviewed, get approved, show a QR code on BIB day — plus a complete admin back office.
+2026), celebrating ECB's 60th anniversary. Bilingual UI — English by default, Thai via the language
+switcher — covering the full participant journey (register, pay, get reviewed, get approved, show a
+QR code on BIB day) plus a complete admin back office.
 
 Built with **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Prisma**.
 
@@ -78,6 +79,27 @@ Dashboard.
   conditions.
 - **Health Consent is mandatory to submit**; Marketing/Communication consent are optional and never
   block registration — per spec sections 8A vs 8B.
+
+## Language (English / Thai)
+
+- All translated strings live in one place, `lib/i18n/dictionaries.ts` — an `en` object (source of
+  truth) and a `th` object typed against it (`th: Dictionary`), so a missing or mismatched Thai key
+  fails `tsc`, not silently falls back to English at runtime.
+- `lib/i18n/LanguageProvider.tsx` holds the current locale in React context, persisted to
+  `localStorage` (`ecb-locale`), defaulting to `en`. The switcher (`components/ui/LanguageSwitcher.tsx`)
+  is on the landing page header, the registration wizard's step bar, and the participant status page.
+- Covered: landing page, the full 6-step registration wizard (including all 7 PAR-Q questions and the
+  three PDPA consent texts — official English PAR-Q wording, not a literal translation), the secure
+  status page, and all 4 transactional emails (the language a participant registered in is stored on
+  `Participant.preferredLocale` and used for every email sent to them afterward).
+- **Not covered (intentionally, to keep scope sane): the admin panel.** Staff-facing screens
+  (dashboard, registration review, settings, reports, BIB check-in) stay in the original Thai/English
+  mix — admins are assumed to be comfortable with both, and translating internal tooling wasn't part
+  of the ask.
+- The ECB 60th-anniversary logo referenced in the landing page header/hero (`/logo.png`) is not
+  bundled — drop the exported logo file at `public/logo.png` (any resolution; it's rendered at ~40px
+  and ~140px) and it'll pick up automatically. Until then those two spots show a broken-image icon,
+  nothing else is affected.
 
 ## Deploying to production
 

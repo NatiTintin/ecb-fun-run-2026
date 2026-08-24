@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { DISTANCES, DISTANCE_LABEL, PARTICIPANT_TYPES, PARTICIPANT_TYPE_LABEL } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
 import { RegistrationDraft, QuotaOverviewItem, PricingInfo, priceFor } from '@/components/register/types';
@@ -19,6 +20,9 @@ export function StepRace({
   quotas: QuotaOverviewItem[];
   pricing: PricingInfo;
 }) {
+  const { dict } = useLanguage();
+  const t = dict.register.race;
+
   const quotaFor = (distance: (typeof DISTANCES)[number], type: (typeof PARTICIPANT_TYPES)[number]) =>
     quotas.find((q) => q.distance === distance && q.participantType === type);
 
@@ -29,13 +33,13 @@ export function StepRace({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-extrabold text-ink">เลือกประเภทและระยะการวิ่ง</h2>
-        <p className="text-sm text-gray-500">Participant Type &amp; Race Distance</p>
+        <h2 className="text-xl font-extrabold text-ink">{t.heading}</h2>
+        <p className="text-sm text-gray-500">{t.subheading}</p>
       </div>
 
       <div>
         <p className="text-sm font-semibold text-ink mb-2">
-          Participant Type <span className="text-brand-500">*</span>
+          {t.participantType} <span className="text-brand-500">*</span>
         </p>
         <div className="grid grid-cols-2 gap-3">
           {PARTICIPANT_TYPES.map((type) => (
@@ -52,7 +56,7 @@ export function StepRace({
 
       <div>
         <p className="text-sm font-semibold text-ink mb-2">
-          Race Distance <span className="text-brand-500">*</span>
+          {t.distance} <span className="text-brand-500">*</span>
         </p>
         <div className="grid grid-cols-2 gap-3">
           {DISTANCES.map((distance) => {
@@ -65,8 +69,16 @@ export function StepRace({
                 selected={draft.distance === distance}
                 onClick={() => update({ distance })}
                 title={DISTANCE_LABEL[distance]}
-                subtitle={q ? `เหลือ ${q.remaining} สิทธิ์` : draft.participantType ? undefined : 'เลือก Participant Type ก่อน'}
-                badge={full ? <Badge tone="danger">FULL / เต็ม</Badge> : q?.status === 'ALMOST_FULL' ? <Badge tone="warning">Almost Full</Badge> : undefined}
+                subtitle={
+                  q ? t.remainingShort.replace('{n}', String(q.remaining)) : draft.participantType ? undefined : t.selectTypeFirst
+                }
+                badge={
+                  full ? (
+                    <Badge tone="danger">{dict.raceOptions.full}</Badge>
+                  ) : q?.status === 'ALMOST_FULL' ? (
+                    <Badge tone="warning">{dict.raceOptions.almostFull}</Badge>
+                  ) : undefined
+                }
               />
             );
           })}
@@ -76,10 +88,12 @@ export function StepRace({
 
       {fee !== null && (
         <div className="rounded-2xl bg-brand-50 border-2 border-brand-200 p-4">
-          <p className="text-sm text-gray-600">Registration Fee</p>
+          <p className="text-sm text-gray-600">{t.registrationFee}</p>
           <p className="text-2xl font-extrabold text-brand-600">{formatTHB(fee)}</p>
           {selectedQuota && (
-            <p className="text-sm text-gray-600 mt-1">Remaining: {selectedQuota.remaining} spots</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {t.remaining}: {selectedQuota.remaining} {t.spots}
+            </p>
           )}
         </div>
       )}

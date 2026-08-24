@@ -58,6 +58,7 @@ export const REGISTRATION_STATUSES = [
 ] as const;
 export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
 
+// Thai labels — used as-is by the (Thai-only) admin panel.
 export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
   SUBMITTED: 'สมัครเรียบร้อยแล้ว รอเจ้าหน้าที่ตรวจสอบ',
   PAYMENT_PENDING: 'ยังไม่ได้รับหลักฐานการชำระเงิน',
@@ -66,6 +67,17 @@ export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
   APPROVED: 'อนุมัติแล้ว',
   REJECTED: 'ถูกปฏิเสธ',
   CANCELLED: 'ยกเลิก',
+};
+
+// English labels — used by the bilingual participant-facing status page.
+export const REGISTRATION_STATUS_LABEL_EN: Record<RegistrationStatus, string> = {
+  SUBMITTED: 'Registered — awaiting staff review',
+  PAYMENT_PENDING: 'Payment proof not yet received',
+  PAYMENT_REVIEW: 'Payment slip attached — under review',
+  PAYMENT_ISSUE: 'There is an issue with the payment slip or amount',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
 };
 
 // Statuses that still occupy a reserved (not-yet-approved) quota slot.
@@ -92,6 +104,14 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
   UNDER_REVIEW: 'กำลังตรวจสอบ',
   PAYMENT_ISSUE: 'มีปัญหา',
   VERIFIED: 'ตรวจสอบแล้ว',
+};
+
+export const PAYMENT_STATUS_LABEL_EN: Record<PaymentStatus, string> = {
+  NOT_PAID: 'Not Paid',
+  SLIP_UPLOADED: 'Proof Attached',
+  UNDER_REVIEW: 'Under Review',
+  PAYMENT_ISSUE: 'Issue Found',
+  VERIFIED: 'Verified',
 };
 
 export const CONSENT_TYPES = ['HEALTH', 'MARKETING', 'COMMUNICATION'] as const;

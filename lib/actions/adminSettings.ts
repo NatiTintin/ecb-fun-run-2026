@@ -63,10 +63,9 @@ export async function updateSettingsAction(
     lineContact: str('lineContact'),
     emailSenderName: str('emailSenderName'),
     emailReplyTo: str('emailReplyTo'),
+    // consentText* are intentionally not writable here — the wizard shows
+    // fixed bilingual legal copy from lib/i18n/dictionaries.ts instead.
     consentPolicyVersion: str('consentPolicyVersion'),
-    consentTextHealth: str('consentTextHealth'),
-    consentTextMarketing: str('consentTextMarketing'),
-    consentTextCommunication: str('consentTextCommunication'),
   };
 
   if (Number.isNaN(data.eventDate.getTime())) return { ok: false, error: 'วันที่จัดกิจกรรมไม่ถูกต้อง' };

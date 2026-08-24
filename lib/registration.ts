@@ -8,7 +8,7 @@ import { sendEmail } from '@/lib/email/send';
 import { registrationReceivedEmail } from '@/lib/email/templates';
 import { savePaymentSlip } from '@/lib/storage';
 import { FullRegistrationInput } from '@/lib/validation';
-import { PAYMENT_STATUS_LABEL } from '@/lib/config';
+import { Locale } from '@/lib/i18n/dictionaries';
 
 export class RegistrationClosedError extends Error {
   constructor(state: string) {
@@ -24,8 +24,9 @@ export function statusUrlFor(statusToken: string) {
 
 export async function submitRegistration(
   input: FullRegistrationInput,
-  opts: { createdByAdminId?: string | null } = {}
+  opts: { createdByAdminId?: string | null; locale?: Locale } = {}
 ) {
+  const locale: Locale = opts.locale ?? 'en';
   const settings = await getEventSettings();
 
   if (!opts.createdByAdminId) {
@@ -58,6 +59,7 @@ export async function submitRegistration(
         createdByAdminId: opts.createdByAdminId ?? null,
         declarationAccepted: input.declarationAccepted,
         declarationAcceptedAt: new Date(),
+        preferredLocale: locale,
       },
     });
 
@@ -118,13 +120,13 @@ export async function submitRegistration(
   });
 
   const { subject, html } = registrationReceivedEmail({
+    locale: participant.preferredLocale as Locale,
     fullName: participant.fullName,
     registrationId: participant.registrationId,
     distance: participant.distance as 'KM3' | 'KM5',
     participantType: participant.participantType as 'ADULT' | 'CHILD',
     shirtSize: participant.shirtSize,
     fee: participant.registrationFee,
-    paymentStatusLabel: PAYMENT_STATUS_LABEL.NOT_PAID,
     statusUrl: statusUrlFor(participant.statusToken),
   });
   await sendEmail({ to: participant.email, subject, html, kind: 'RECEIVED', participantId: participant.id });

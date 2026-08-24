@@ -106,6 +106,10 @@ model Participant {
   declarationAccepted   Boolean  @default(false)
   declarationAcceptedAt DateTime?
 
+  // UI language the participant registered in ("en" | "th") — used to pick
+  // the language of transactional emails sent to them.
+  preferredLocale String @default("en")
+
   createdByAdminId String?
   createdByAdmin   Admin?  @relation("CreatedByAdmin", fields: [createdByAdminId], references: [id])
 

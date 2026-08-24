@@ -6,10 +6,14 @@ export function YesNoToggle({
   value,
   onChange,
   name,
+  yesLabel = 'YES',
+  noLabel = 'NO',
 }: {
   value: boolean | null;
   onChange: (v: boolean) => void;
   name: string;
+  yesLabel?: string;
+  noLabel?: string;
 }) {
   return (
     <div className="flex gap-3" role="radiogroup" aria-label={name}>
@@ -25,7 +29,7 @@ export function YesNoToggle({
             : 'bg-white border-gray-200 text-ink hover:border-red-300'
         )}
       >
-        ใช่ / YES
+        {yesLabel}
       </button>
       <button
         type="button"
@@ -39,7 +43,7 @@ export function YesNoToggle({
             : 'bg-white border-gray-200 text-ink hover:border-teal-300'
         )}
       >
-        ไม่ใช่ / NO
+        {noLabel}
       </button>
     </div>
   );

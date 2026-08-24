@@ -143,8 +143,10 @@ export async function createManualRegistrationAction(formData: FormData): Promis
     return { ok: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง', fieldErrors };
   }
 
+  const locale = formData.get('locale') === 'th' ? 'th' : 'en';
+
   try {
-    const participant = await submitRegistration(parsed.data, { createdByAdminId: session.adminId });
+    const participant = await submitRegistration(parsed.data, { createdByAdminId: session.adminId, locale });
     revalidatePath('/admin/registrations');
     revalidatePath('/admin');
     return { ok: true, registrationId: participant.registrationId };

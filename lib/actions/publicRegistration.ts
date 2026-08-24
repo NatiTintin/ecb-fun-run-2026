@@ -6,6 +6,72 @@ import { QuotaFullError } from '@/lib/quota';
 import { rateLimit, clientIpFrom } from '@/lib/rateLimit';
 import { db } from '@/lib/db';
 import { headers } from 'next/headers';
+import { dictionaries, Locale } from '@/lib/i18n/dictionaries';
+
+function localeFrom(formData: FormData): Locale {
+  const v = formData.get('locale');
+  return v === 'th' ? 'th' : 'en';
+}
+
+const SERVER_MESSAGES: Record<Locale, Record<string, string>> = {
+  en: {
+    rateLimited: 'Too many requests. Please try again later.',
+    invalidData: 'Some information isn’t valid — please check and try again.',
+    quotaFull: 'Sorry, that category is now full. Please choose a different one.',
+    registrationClosed: 'Registration is currently closed.',
+    generic: 'Something went wrong. Please try again.',
+    notFound: 'Registration not found.',
+    wrongStatus: 'Payment proof cannot be attached in the current status.',
+    chooseFile: 'Please choose a payment proof file.',
+    uploadFailed: 'Upload failed.',
+  },
+  th: {
+    rateLimited: 'มีการส่งคำขอถี่เกินไป กรุณาลองใหม่อีกครั้งในภายหลัง',
+    invalidData: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
+    quotaFull: 'ขออภัย ประเภทที่ท่านเลือกมีผู้สมัครเต็มจำนวนแล้ว กรุณาเลือกประเภทอื่น',
+    registrationClosed: 'ขณะนี้ระบบปิดรับสมัครแล้ว',
+    generic: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+    notFound: 'ไม่พบข้อมูลการสมัคร',
+    wrongStatus: 'ไม่สามารถแนบหลักฐานได้ในสถานะปัจจุบัน',
+    chooseFile: 'กรุณาเลือกไฟล์หลักฐานการชำระเงิน',
+    uploadFailed: 'อัปโหลดไม่สำเร็จ',
+  },
+};
+
+function fieldErrorMessage(path: string, locale: Locale): string {
+  const t = dictionaries[locale].register;
+  switch (path) {
+    case 'fullName':
+    case 'phone':
+    case 'email':
+      return t.details.errors[path];
+    case 'participantType':
+    case 'distance':
+      return t.race.errors[path];
+    case 'shirtSize':
+      return t.shirt.errors.shirtSize;
+    case 'parqAcknowledged':
+      return t.health.errors.ackRequired;
+    case 'healthConsent':
+      return t.health.errors.healthConsentMandatory;
+    case 'marketingConsent':
+      return t.health.errors.marketingConsentRequired;
+    case 'communicationConsent':
+      return t.health.errors.communicationConsentRequired;
+    case 'declarationAccepted':
+      return t.health.errors.declarationRequired;
+    case 'q1':
+    case 'q2':
+    case 'q3':
+    case 'q4':
+    case 'q5':
+    case 'q6':
+    case 'q7':
+      return t.health.errors.answerRequired;
+    default:
+      return SERVER_MESSAGES[locale].invalidData;
+  }
+}
 
 function formDataToInput(formData: FormData) {
   const bool = (v: FormDataEntryValue | null) => v === 'true';
@@ -36,9 +102,12 @@ export type SubmitRegistrationResult =
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
 export async function submitRegistrationAction(formData: FormData): Promise<SubmitRegistrationResult> {
+  const locale = localeFrom(formData);
+  const msg = SERVER_MESSAGES[locale];
+
   const ip = clientIpFrom(headers());
   if (!rateLimit(`register:${ip}`, 8, 10 * 60 * 1000)) {
-    return { ok: false, error: 'มีการส่งคำขอถี่เกินไป กรุณาลองใหม่อีกครั้งในภายหลัง' };
+    return { ok: false, error: msg.rateLimited };
   }
 
   const raw = formDataToInput(formData);
@@ -46,13 +115,14 @@ export async function submitRegistrationAction(formData: FormData): Promise<Subm
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
-      fieldErrors[String(issue.path[0])] = issue.message;
+      const path = String(issue.path[0]);
+      fieldErrors[path] = fieldErrorMessage(path, locale);
     }
-    return { ok: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง', fieldErrors };
+    return { ok: false, error: msg.invalidData, fieldErrors };
   }
 
   try {
-    const participant = await submitRegistration(parsed.data);
+    const participant = await submitRegistration(parsed.data, { locale });
 
     const slip = formData.get('slip');
     if (slip instanceof File && slip.size > 0) {
@@ -67,13 +137,13 @@ export async function submitRegistrationAction(formData: FormData): Promise<Subm
     return { ok: true, registrationId: participant.registrationId, statusToken: participant.statusToken };
   } catch (err) {
     if (err instanceof QuotaFullError) {
-      return { ok: false, error: 'ขออภัย ประเภทที่ท่านเลือกมีผู้สมัครเต็มจำนวนแล้ว กรุณาเลือกประเภทอื่น' };
+      return { ok: false, error: msg.quotaFull };
     }
     if (err instanceof RegistrationClosedError) {
-      return { ok: false, error: 'ขณะนี้ระบบปิดรับสมัครแล้ว' };
+      return { ok: false, error: msg.registrationClosed };
     }
     console.error('submitRegistrationAction failed', err);
-    return { ok: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' };
+    return { ok: false, error: msg.generic };
   }
 }
 
@@ -81,20 +151,23 @@ export async function uploadSlipAction(
   statusToken: string,
   formData: FormData
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const locale = localeFrom(formData);
+  const msg = SERVER_MESSAGES[locale];
+
   const ip = clientIpFrom(headers());
   if (!rateLimit(`upload:${ip}`, 15, 10 * 60 * 1000)) {
-    return { ok: false, error: 'มีการส่งคำขอถี่เกินไป กรุณาลองใหม่อีกครั้งในภายหลัง' };
+    return { ok: false, error: msg.rateLimited };
   }
 
   const participant = await db.participant.findUnique({ where: { statusToken } });
-  if (!participant) return { ok: false, error: 'ไม่พบข้อมูลการสมัคร' };
+  if (!participant) return { ok: false, error: msg.notFound };
   if (!['SUBMITTED', 'PAYMENT_PENDING', 'PAYMENT_REVIEW', 'PAYMENT_ISSUE'].includes(participant.registrationStatus)) {
-    return { ok: false, error: 'ไม่สามารถแนบหลักฐานได้ในสถานะปัจจุบัน' };
+    return { ok: false, error: msg.wrongStatus };
   }
 
   const slip = formData.get('slip');
   if (!(slip instanceof File) || slip.size === 0) {
-    return { ok: false, error: 'กรุณาเลือกไฟล์หลักฐานการชำระเงิน' };
+    return { ok: false, error: msg.chooseFile };
   }
 
   try {
@@ -102,6 +175,6 @@ export async function uploadSlipAction(
     return { ok: true };
   } catch (err) {
     console.error('uploadSlipAction failed', err);
-    return { ok: false, error: err instanceof Error ? err.message : 'อัปโหลดไม่สำเร็จ' };
+    return { ok: false, error: err instanceof Error ? err.message : msg.uploadFailed };
   }
 }

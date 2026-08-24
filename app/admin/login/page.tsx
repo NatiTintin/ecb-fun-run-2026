@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
   const [state, formAction] = useFormState(loginAction, {});
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-5 bg-gradient-to-br from-brand-500 via-brand-400 to-sunshine-400">
+    <main className="min-h-screen flex items-center justify-center px-5 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
       <Card className="w-full max-w-sm space-y-5">
         <div className="text-center">
           <p className="text-xs uppercase tracking-widest text-brand-500 font-bold">ECB Fun Run 2026</p>

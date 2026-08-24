@@ -24,12 +24,6 @@ export type PaymentInfo = {
   paymentInstructions: string;
 };
 
-export type ConsentTextInfo = {
-  health: string;
-  marketing: string;
-  communication: string;
-};
-
 export type RegistrationDraft = {
   fullName: string;
   phone: string;
