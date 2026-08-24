@@ -16,14 +16,21 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 export function StepReview({ draft, pricing }: { draft: RegistrationDraft; pricing: PricingInfo }) {
-  const { dict } = useLanguage();
+  const { dict, locale } = useLanguage();
   const t = dict.register.review;
+  const dt = dict.register.details;
 
   const fee =
     draft.distance && draft.participantType
       ? priceFor(pricing, draft.distance as Distance, draft.participantType as ParticipantType)
       : 0;
   const hasHealthFlag = Object.values(draft.parq).some((v) => v === true);
+
+  const dobLabel = draft.dateOfBirth
+    ? new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-GB', { dateStyle: 'long' }).format(
+        new Date(`${draft.dateOfBirth}T00:00:00`)
+      )
+    : '-';
 
   return (
     <div className="space-y-5">
@@ -37,6 +44,8 @@ export function StepReview({ draft, pricing }: { draft: RegistrationDraft; prici
         <Row label={t.fullName} value={draft.fullName} />
         <Row label={t.phone} value={draft.phone} />
         <Row label={t.email} value={draft.email} />
+        <Row label={dt.dateOfBirth} value={dobLabel} />
+        <Row label={dt.idNumber} value={draft.idNumber || '-'} />
       </Card>
 
       <Card>

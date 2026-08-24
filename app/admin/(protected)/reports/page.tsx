@@ -43,6 +43,7 @@ export default async function ReportsPage() {
 
   const approvedCount = await db.participant.count({ where: { registrationStatus: 'APPROVED' } });
   const collectedCount = await db.bibCollection.count({ where: { collected: true } });
+  const insuranceCount = activeParticipants.length;
 
   return (
     <div className="p-5 lg:p-8 space-y-6 max-w-4xl">
@@ -104,6 +105,20 @@ export default async function ReportsPage() {
             <p className="text-xs text-gray-500">Payment Issue</p>
             <p className="text-xl font-extrabold text-red-600">{formatTHB(issue)}</p>
           </div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-ink">Insurance Report</h2>
+          <ExportLink type="insurance" />
+        </div>
+        <p className="text-xs text-gray-500 mb-2">
+          Date of birth, age, and ID/Passport number for active registrations — for accident insurance paperwork.
+        </p>
+        <div className="rounded-xl bg-gray-50 p-3 text-center">
+          <p className="text-xs text-gray-500">Participants to insure</p>
+          <p className="text-2xl font-extrabold text-ink">{insuranceCount}</p>
         </div>
       </Card>
 

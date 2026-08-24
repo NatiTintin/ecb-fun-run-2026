@@ -7,10 +7,13 @@ import {
   PARTICIPANT_TYPE_LABEL,
   REGISTRATION_STATUS_LABEL,
   PAYMENT_STATUS_LABEL,
+  ID_TYPE_LABEL,
+  calculateAge,
   Distance,
   ParticipantType,
   RegistrationStatus,
   PaymentStatus,
+  IdType,
 } from '@/lib/config';
 
 function csvResponse(csv: string, filename: string) {
@@ -102,6 +105,26 @@ export async function GET(req: NextRequest) {
       'Collected At': p.bib?.collectedAt ? p.bib.collectedAt.toISOString() : '',
     }));
     return csvResponse(toCsv(rows), 'bib-report.csv');
+  }
+
+  if (type === 'insurance') {
+    const participants = await db.participant.findMany({
+      where: { registrationStatus: { notIn: ['REJECTED', 'CANCELLED'] } },
+      orderBy: { createdAt: 'desc' },
+    });
+    const rows = participants.map((p) => ({
+      'Registration ID': p.registrationId,
+      Name: p.fullName,
+      'Date of Birth': p.dateOfBirth.toISOString().slice(0, 10),
+      'Age (years)': calculateAge(p.dateOfBirth),
+      'ID Type': ID_TYPE_LABEL[p.idType as IdType],
+      'ID / Passport Number': p.idNumber,
+      Type: PARTICIPANT_TYPE_LABEL[p.participantType as ParticipantType],
+      Distance: DISTANCE_LABEL[p.distance as Distance],
+      Phone: p.phone,
+      Email: p.email,
+    }));
+    return csvResponse(toCsv(rows), 'insurance-report.csv');
   }
 
   return NextResponse.json({ error: 'Unknown report type' }, { status: 400 });

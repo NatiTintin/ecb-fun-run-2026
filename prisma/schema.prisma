@@ -28,6 +28,12 @@ model EventSettings {
   registrationOverride  String   @default("AUTO")
   reservationExpiryMinutes Int   @default(60)
   childCriteriaNote     String  @default("")
+  // Optional, admin-set-later age check (spec explicitly forbids hard-coding
+  // a child-age cutoff). Null = no automatic flag. When set, the admin
+  // registration detail page flags a mismatch between this and the
+  // participant's declared Adult/Child category — informational only,
+  // never blocks registration or approval.
+  childMaxAgeYears      Int?
 
   price5kmAdult Int @default(790)
   price5kmChild Int @default(490)
@@ -96,6 +102,12 @@ model Participant {
   distance        String // KM3 | KM5
   shirtSize       String // 3XS..4XL
   registrationFee Int
+
+  // Collected for accident insurance, and so staff can verify a declared
+  // Adult/Child category against actual date of birth.
+  dateOfBirth DateTime
+  idType      String // THAI_ID | PASSPORT
+  idNumber    String
 
   registrationStatus String @default("SUBMITTED")
   // Bearer token for the participant's secure, no-login status page.

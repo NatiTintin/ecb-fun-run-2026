@@ -38,6 +38,12 @@ export async function updateSettingsAction(
     const v = Number(formData.get(key));
     return Number.isFinite(v) ? Math.round(v) : 0;
   };
+  const optionalInt = (key: string) => {
+    const raw = str(key);
+    if (!raw) return null;
+    const v = Number(raw);
+    return Number.isFinite(v) ? Math.round(v) : null;
+  };
 
   const before = await db.eventSettings.findUnique({ where: { id: 'singleton' } });
 
@@ -48,6 +54,7 @@ export async function updateSettingsAction(
     registrationCloseAt: fromBangkokInputValue(str('registrationCloseAt')),
     reservationExpiryMinutes: int('reservationExpiryMinutes'),
     childCriteriaNote: str('childCriteriaNote'),
+    childMaxAgeYears: optionalInt('childMaxAgeYears'),
     price5kmAdult: int('price5kmAdult'),
     price5kmChild: int('price5kmChild'),
     price3kmAdult: int('price3kmAdult'),

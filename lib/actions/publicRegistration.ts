@@ -1,6 +1,6 @@
 'use server';
 
-import { fullRegistrationSchema } from '@/lib/validation';
+import { fullRegistrationSchema, IdentityErrorCode } from '@/lib/validation';
 import { submitRegistration, RegistrationClosedError, attachPaymentSlip } from '@/lib/registration';
 import { QuotaFullError } from '@/lib/quota';
 import { rateLimit, clientIpFrom } from '@/lib/rateLimit';
@@ -38,13 +38,16 @@ const SERVER_MESSAGES: Record<Locale, Record<string, string>> = {
   },
 };
 
-function fieldErrorMessage(path: string, locale: Locale): string {
+function fieldErrorMessage(path: string, locale: Locale, code?: string): string {
   const t = dictionaries[locale].register;
   switch (path) {
     case 'fullName':
     case 'phone':
     case 'email':
       return t.details.errors[path];
+    case 'dateOfBirth':
+    case 'idNumber':
+      return t.details.errors[(code as IdentityErrorCode) ?? 'ID_REQUIRED'];
     case 'participantType':
     case 'distance':
       return t.race.errors[path];
@@ -79,6 +82,9 @@ function formDataToInput(formData: FormData) {
     fullName: String(formData.get('fullName') ?? ''),
     phone: String(formData.get('phone') ?? ''),
     email: String(formData.get('email') ?? ''),
+    dateOfBirth: String(formData.get('dateOfBirth') ?? ''),
+    idType: String(formData.get('idType') ?? 'THAI_ID'),
+    idNumber: String(formData.get('idNumber') ?? ''),
     participantType: String(formData.get('participantType') ?? ''),
     distance: String(formData.get('distance') ?? ''),
     shirtSize: String(formData.get('shirtSize') ?? ''),
@@ -116,7 +122,7 @@ export async function submitRegistrationAction(formData: FormData): Promise<Subm
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
       const path = String(issue.path[0]);
-      fieldErrors[path] = fieldErrorMessage(path, locale);
+      fieldErrors[path] = fieldErrorMessage(path, locale, issue.message);
     }
     return { ok: false, error: msg.invalidData, fieldErrors };
   }

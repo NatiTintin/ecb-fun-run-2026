@@ -15,6 +15,7 @@ import { submitRegistration, RegistrationClosedError } from '@/lib/registration'
 import { QuotaFullError } from '@/lib/quota';
 import { fullRegistrationSchema } from '@/lib/validation';
 import { AdminRole } from '@/lib/config';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -134,12 +135,22 @@ export async function createManualRegistrationAction(formData: FormData): Promis
     marketingConsent: String(formData.get('marketingConsent') ?? ''),
     communicationConsent: String(formData.get('communicationConsent') ?? ''),
     declarationAccepted: bool(formData.get('declarationAccepted')),
+    dateOfBirth: String(formData.get('dateOfBirth') ?? ''),
+    idType: String(formData.get('idType') ?? 'THAI_ID'),
+    idNumber: String(formData.get('idNumber') ?? ''),
   };
 
   const parsed = fullRegistrationSchema.safeParse(raw);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) fieldErrors[String(issue.path[0])] = issue.message;
+    const identityErrorText = dictionaries.en.register.details.errors;
+    for (const issue of parsed.error.issues) {
+      const path = String(issue.path[0]);
+      fieldErrors[path] =
+        path === 'dateOfBirth' || path === 'idNumber'
+          ? identityErrorText[issue.message as keyof typeof identityErrorText] ?? issue.message
+          : issue.message;
+    }
     return { ok: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง', fieldErrors };
   }
 

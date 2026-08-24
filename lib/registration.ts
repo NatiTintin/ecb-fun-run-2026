@@ -7,7 +7,7 @@ import { writeAuditLog } from '@/lib/audit';
 import { sendEmail } from '@/lib/email/send';
 import { registrationReceivedEmail } from '@/lib/email/templates';
 import { savePaymentSlip } from '@/lib/storage';
-import { FullRegistrationInput } from '@/lib/validation';
+import { FullRegistrationInput, parseDateOfBirth } from '@/lib/validation';
 import { Locale } from '@/lib/i18n/dictionaries';
 
 export class RegistrationClosedError extends Error {
@@ -50,6 +50,9 @@ export async function submitRegistration(
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
+        dateOfBirth: parseDateOfBirth(input.dateOfBirth) ?? new Date(0),
+        idType: input.idType,
+        idNumber: input.idNumber.trim(),
         participantType: input.participantType,
         distance: input.distance,
         shirtSize: input.shirtSize,

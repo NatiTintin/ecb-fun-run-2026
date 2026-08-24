@@ -1,4 +1,4 @@
-import { Distance, ParticipantType, ShirtSize } from '@/lib/config';
+import { Distance, ParticipantType, ShirtSize, IdType } from '@/lib/config';
 
 export type QuotaOverviewItem = {
   distance: Distance;
@@ -28,6 +28,9 @@ export type RegistrationDraft = {
   fullName: string;
   phone: string;
   email: string;
+  dateOfBirth: string; // 'YYYY-MM-DD', from <input type="date">
+  idType: IdType;
+  idNumber: string;
   participantType: ParticipantType | null;
   distance: Distance | null;
   shirtSize: ShirtSize | null;
@@ -52,6 +55,9 @@ export const emptyDraft: RegistrationDraft = {
   fullName: '',
   phone: '',
   email: '',
+  dateOfBirth: '',
+  idType: 'THAI_ID',
+  idNumber: '',
   participantType: null,
   distance: null,
   shirtSize: null,

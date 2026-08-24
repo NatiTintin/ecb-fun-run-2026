@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { participantInfoSchema, shirtSizeSchema } from '@/lib/validation';
+import { participantInfoSchema, shirtSizeSchema, validateIdentityFields } from '@/lib/validation';
 import { submitRegistrationAction } from '@/lib/actions/publicRegistration';
 import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { Dictionary } from '@/lib/i18n/dictionaries';
@@ -31,6 +31,14 @@ function validateStep(step: number, draft: RegistrationDraft, dict: Dictionary):
         errors[field] = dict.register.details.errors[field];
       }
     }
+
+    const identityErrors = validateIdentityFields({
+      dateOfBirth: draft.dateOfBirth,
+      idType: draft.idType,
+      idNumber: draft.idNumber,
+    });
+    if (identityErrors.dateOfBirth) errors.dateOfBirth = dict.register.details.errors[identityErrors.dateOfBirth];
+    if (identityErrors.idNumber) errors.idNumber = dict.register.details.errors[identityErrors.idNumber];
   }
 
   if (step === 2) {
@@ -70,6 +78,9 @@ function buildFormData(draft: RegistrationDraft, locale: string): FormData {
   fd.set('fullName', draft.fullName);
   fd.set('phone', draft.phone);
   fd.set('email', draft.email);
+  fd.set('dateOfBirth', draft.dateOfBirth);
+  fd.set('idType', draft.idType);
+  fd.set('idNumber', draft.idNumber);
   fd.set('participantType', draft.participantType ?? '');
   fd.set('distance', draft.distance ?? '');
   fd.set('shirtSize', draft.shirtSize ?? '');

@@ -79,6 +79,15 @@ Dashboard.
   conditions.
 - **Health Consent is mandatory to submit**; Marketing/Communication consent are optional and never
   block registration — per spec sections 8A vs 8B.
+- **Date of birth and ID/passport number** are collected for accident insurance, validated with a real
+  Thai national ID mod-11 checksum (`lib/validation.ts#isValidThaiNationalId`) or a passport format
+  check. Dates of birth are pure calendar dates with no timezone meaning, so they're always anchored to
+  UTC midnight on parse (`parseDateOfBirth`) and read back with UTC getters (`calculateAge`) — using
+  local-time getters here would silently shift the stored date depending on the server's timezone.
+- **Adult/Child age check is admin-configurable, never hard-coded** (`EventSettings.childMaxAgeYears`,
+  nullable — the spec explicitly forbids baking in an age cutoff since it isn't finalized). When an
+  admin sets it, the registration detail page shows a non-blocking "Age / Category Mismatch" flag if
+  the declared category doesn't match the computed age; nothing is auto-rejected.
 
 ## Language (English / Thai)
 
@@ -147,6 +156,9 @@ prisma/schema.prisma        Data model (see file header for the SQLite/Postgres 
   15-minute HMAC token, and only to an authenticated admin session.
 - PAR-Q health answers are only shown on the admin registration detail page (auth + RBAC gated), never
   in dashboard summaries.
+- National ID / passport numbers follow the same pattern: visible only on the admin detail page, never
+  in the registrations table/list view, and only pulled into CSV via the dedicated, purpose-limited
+  "Insurance Report" export (not bundled into the general registrations export).
 - QR codes encode a random opaque token only — no phone/email/health data.
 - Passwords are hashed with bcrypt (cost 12); admin sessions are signed JWTs in an `httpOnly`,
   `sameSite=lax` cookie.

@@ -1,18 +1,22 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { signedSlipUrl } from '@/lib/storage';
+import { getEventSettings } from '@/lib/settings';
 import {
   DISTANCE_LABEL,
   PARTICIPANT_TYPE_LABEL,
   REGISTRATION_STATUS_LABEL,
   PAYMENT_STATUS_LABEL,
   PARQ_QUESTIONS,
+  ID_TYPE_LABEL,
+  calculateAge,
   Distance,
   ParticipantType,
+  IdType,
   RegistrationStatus,
   PaymentStatus,
 } from '@/lib/config';
-import { formatTHB, formatThaiDateTime } from '@/lib/utils';
+import { formatTHB, formatThaiDateTime, formatThaiDate } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { RegistrationDetailActions } from '@/components/admin/RegistrationDetailActions';
@@ -42,8 +46,14 @@ export default async function RegistrationDetailPage({ params }: { params: { id:
   });
   if (!participant) notFound();
 
+  const settings = await getEventSettings();
   const latestPayment = participant.payments[0];
   const canVerify = !!latestPayment?.slipUrl;
+  const age = calculateAge(participant.dateOfBirth);
+  const ageMismatch =
+    settings.childMaxAgeYears != null &&
+    ((participant.participantType === 'CHILD' && age > settings.childMaxAgeYears) ||
+      (participant.participantType === 'ADULT' && age <= settings.childMaxAgeYears));
 
   return (
     <div className="p-5 lg:p-8 space-y-5 max-w-4xl">
@@ -68,7 +78,10 @@ export default async function RegistrationDetailPage({ params }: { params: { id:
       </div>
 
       <Card>
-        <h2 className="font-bold text-ink mb-3">Participant</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-ink">Participant</h2>
+          {ageMismatch && <Badge tone="danger">Age / Category Mismatch — Please Verify</Badge>}
+        </div>
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           <dt className="text-gray-500">Name</dt>
           <dd className="font-semibold text-ink">{participant.fullName}</dd>
@@ -76,7 +89,20 @@ export default async function RegistrationDetailPage({ params }: { params: { id:
           <dd className="font-semibold text-ink">{participant.phone}</dd>
           <dt className="text-gray-500">Email</dt>
           <dd className="font-semibold text-ink">{participant.email}</dd>
+          <dt className="text-gray-500">Date of Birth</dt>
+          <dd className="font-semibold text-ink">
+            {formatThaiDate(participant.dateOfBirth)} ({age} ปี)
+          </dd>
+          <dt className="text-gray-500">ID Document</dt>
+          <dd className="font-semibold text-ink">
+            {ID_TYPE_LABEL[participant.idType as IdType]}: {participant.idNumber}
+          </dd>
         </dl>
+        {settings.childMaxAgeYears == null && (
+          <p className="mt-2 text-xs text-gray-400">
+            ตั้งค่า &ldquo;Child Max Age&rdquo; ใน Settings เพื่อให้ระบบช่วยตรวจสอบอายุกับประเภทที่เลือกอัตโนมัติ
+          </p>
+        )}
       </Card>
 
       <Card>

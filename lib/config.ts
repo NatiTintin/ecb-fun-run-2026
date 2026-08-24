@@ -19,6 +19,29 @@ export const PARTICIPANT_TYPE_LABEL: Record<ParticipantType, string> = {
   CHILD: 'Child / เด็ก',
 };
 
+export const ID_TYPES = ['THAI_ID', 'PASSPORT'] as const;
+export type IdType = (typeof ID_TYPES)[number];
+
+export const ID_TYPE_LABEL: Record<IdType, string> = {
+  THAI_ID: 'เลขบัตรประชาชน / Thai National ID',
+  PASSPORT: 'Passport',
+};
+
+/**
+ * Age in whole years as of `atDate` (defaults to now). Uses UTC getters
+ * throughout — dateOfBirth is a UTC-midnight-anchored calendar date (see
+ * parseDateOfBirth), so comparing it with local-time getters would shift
+ * the result depending on the server's timezone.
+ */
+export function calculateAge(dateOfBirth: Date, atDate: Date = new Date()): number {
+  let age = atDate.getUTCFullYear() - dateOfBirth.getUTCFullYear();
+  const monthDiff = atDate.getUTCMonth() - dateOfBirth.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && atDate.getUTCDate() < dateOfBirth.getUTCDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
 export const SHIRT_SIZES = [
   '3XS',
   '2XS',

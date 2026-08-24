@@ -75,6 +75,12 @@ export function SettingsForm({ settings, quotas }: { settings: EventSettings; qu
         </div>
         <TextField label="Reservation Expiry (minutes)" name="reservationExpiryMinutes" type="number" defaultValue={settings.reservationExpiryMinutes} />
         <TextAreaField label="Child Eligibility Note (informational only, not enforced)" name="childCriteriaNote" defaultValue={settings.childCriteriaNote} />
+        <TextField
+          label="Child Max Age (years) — optional, leave blank to disable the automatic age/category check"
+          name="childMaxAgeYears"
+          type="number"
+          defaultValue={settings.childMaxAgeYears ?? ''}
+        />
       </Section>
 
       <Section title="Pricing (THB)">
