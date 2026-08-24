@@ -1,0 +1,217 @@
+// ECB Fun Run 2026 — data model.
+//
+// `provider` below is set to sqlite for a zero-setup local dev experience.
+// For production, point DATABASE_URL at a real Postgres instance (Supabase,
+// Neon, RDS, ...) and change provider to "postgresql" — no other schema
+// changes are required. Enums are modeled as validated String fields (not
+// Prisma `enum`) specifically so this file works unchanged on both SQLite
+// and Postgres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model EventSettings {
+  id String @id @default("singleton")
+
+  eventName             String @default("ECB Fun Run 2026")
+  eventDate             DateTime
+  registrationOpenAt    DateTime
+  registrationCloseAt   DateTime
+  // AUTO = follow the open/close dates above. FORCE_OPEN / FORCE_CLOSED let
+  // an admin override the automatic date-based gate.
+  registrationOverride  String   @default("AUTO")
+  reservationExpiryMinutes Int   @default(60)
+  childCriteriaNote     String  @default("")
+
+  price5kmAdult Int @default(790)
+  price5kmChild Int @default(490)
+  price3kmAdult Int @default(590)
+  price3kmChild Int @default(290)
+
+  bankName            String @default("")
+  bankAccountName     String @default("")
+  bankAccountNumber   String @default("")
+  promptPayNumber     String @default("")
+  promptPayQrImageUrl String @default("")
+  paymentInstructions String @default("")
+
+  organizerEmail String @default("")
+  organizerPhone String @default("")
+  lineContact    String @default("")
+
+  emailSenderName String @default("ECB Fun Run 2026")
+  emailReplyTo    String @default("")
+
+  consentPolicyVersion  String @default("1.0")
+  consentTextHealth     String @default("")
+  consentTextMarketing  String @default("")
+  consentTextCommunication String @default("")
+
+  updatedAt DateTime @updatedAt
+}
+
+model Quota {
+  id              String @id @default(cuid())
+  distance        String // KM3 | KM5
+  participantType String // ADULT | CHILD
+  capacity        Int
+  reservedCount   Int    @default(0)
+  approvedCount   Int    @default(0)
+  // Monotonically increasing, never decremented — used only to mint unique
+  // human-readable registration IDs (ECB26-5A-0001). Distinct from
+  // reservedCount/approvedCount, which move up and down with status.
+  nextSequence    Int    @default(0)
+
+  @@unique([distance, participantType])
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String // SUPER_ADMIN | REGISTRATION_STAFF | BIB_STAFF
+  createdAt    DateTime @default(now())
+
+  auditLogs      AuditLog[]
+  verifiedPayments Payment[] @relation("VerifiedBy")
+  bibCollections BibCollection[]
+  createdParticipants Participant[] @relation("CreatedByAdmin")
+}
+
+model Participant {
+  id             String   @id @default(cuid())
+  registrationId String   @unique
+
+  fullName        String
+  phone           String
+  email           String
+  participantType String // ADULT | CHILD
+  distance        String // KM3 | KM5
+  shirtSize       String // 3XS..4XL
+  registrationFee Int
+
+  registrationStatus String @default("SUBMITTED")
+  // Bearer token for the participant's secure, no-login status page.
+  statusToken     String   @unique
+
+  // Section 7 "Participant Declaration" checkbox — distinct from the PAR-Q
+  // section 6 acknowledgement stored on ParqResponse.
+  declarationAccepted   Boolean  @default(false)
+  declarationAcceptedAt DateTime?
+
+  createdByAdminId String?
+  createdByAdmin   Admin?  @relation("CreatedByAdmin", fields: [createdByAdminId], references: [id])
+
+  reservedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments   Payment[]
+  parq       ParqResponse?
+  consents   Consent[]
+  qrCode     QrCode?
+  bib        BibCollection?
+  auditLogs  AuditLog[]
+  emailLogs  EmailLog[]
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id])
+
+  amount        Int
+  slipUrl       String?
+  paymentStatus String   @default("NOT_PAID") // NOT_PAID | SLIP_UPLOADED | UNDER_REVIEW | PAYMENT_ISSUE | VERIFIED
+  uploadedAt    DateTime?
+  verifiedAt    DateTime?
+  verifiedById  String?
+  verifiedBy    Admin?   @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  issueReason   String?
+
+  createdAt DateTime @default(now())
+}
+
+model ParqResponse {
+  participantId String  @id
+  participant   Participant @relation(fields: [participantId], references: [id])
+
+  q1 Boolean
+  q2 Boolean
+  q3 Boolean
+  q4 Boolean
+  q5 Boolean
+  q6 Boolean
+  q7 Boolean
+
+  hasHealthFlag       Boolean
+  declarationAccepted Boolean
+  acceptedAt          DateTime
+}
+
+model Consent {
+  id            String   @id @default(cuid())
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id])
+
+  consentType   String // HEALTH | MARKETING | COMMUNICATION
+  consentStatus String // CONSENT | NO_CONSENT
+  policyVersion String
+  consentedAt   DateTime @default(now())
+
+  @@index([participantId])
+}
+
+model QrCode {
+  participantId String   @id
+  participant   Participant @relation(fields: [participantId], references: [id])
+  token         String   @unique
+  generatedAt   DateTime @default(now())
+  status        String   @default("ACTIVE") // ACTIVE | REVOKED
+}
+
+model BibCollection {
+  participantId String   @id
+  participant   Participant @relation(fields: [participantId], references: [id])
+  collected     Boolean  @default(false)
+  collectedAt   DateTime?
+  collectedById String?
+  collectedBy   Admin?   @relation(fields: [collectedById], references: [id])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  adminId       String?
+  admin         Admin?   @relation(fields: [adminId], references: [id])
+  participantId String?
+  participant   Participant? @relation(fields: [participantId], references: [id])
+  action        String
+  previousValue String? // JSON-encoded
+  newValue      String? // JSON-encoded
+  note          String?
+  timestamp     DateTime @default(now())
+
+  @@index([participantId])
+  @@index([adminId])
+}
+
+model EmailLog {
+  id            String   @id @default(cuid())
+  participantId String?
+  participant   Participant? @relation(fields: [participantId], references: [id])
+  toEmail       String
+  subject       String
+  bodyHtml      String
+  kind          String // RECEIVED | PAYMENT_REMINDER | PAYMENT_ISSUE | APPROVED
+  provider      String // DEV | RESEND
+  success       Boolean  @default(true)
+  sentAt        DateTime @default(now())
+}
