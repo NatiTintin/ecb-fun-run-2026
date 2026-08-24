@@ -9,11 +9,19 @@ import { registrationReceivedEmail } from '@/lib/email/templates';
 import { savePaymentSlip } from '@/lib/storage';
 import { FullRegistrationInput, parseDateOfBirth } from '@/lib/validation';
 import { Locale } from '@/lib/i18n/dictionaries';
+import { calculateAge, requiredParticipantType, ParticipantType } from '@/lib/config';
 
 export class RegistrationClosedError extends Error {
   constructor(state: string) {
     super(`Registration is not open (state: ${state})`);
     this.name = 'RegistrationClosedError';
+  }
+}
+
+export class AgeCategoryMismatchError extends Error {
+  constructor(public requiredType: ParticipantType) {
+    super(`Participant type must be ${requiredType} based on date of birth`);
+    this.name = 'AgeCategoryMismatchError';
   }
 }
 
@@ -32,6 +40,14 @@ export async function submitRegistration(
   if (!opts.createdByAdminId) {
     const state = computeRegistrationWindowState(settings);
     if (state !== 'OPEN') throw new RegistrationClosedError(state);
+  }
+
+  const dob = parseDateOfBirth(input.dateOfBirth);
+  if (dob) {
+    const required = requiredParticipantType(calculateAge(dob), settings.childMaxAgeYears);
+    if (required && input.participantType !== required) {
+      throw new AgeCategoryMismatchError(required);
+    }
   }
 
   const fee = priceFor(settings, input.distance, input.participantType);

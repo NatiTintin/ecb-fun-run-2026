@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { participantInfoSchema, shirtSizeSchema, validateIdentityFields } from '@/lib/validation';
+import { participantInfoSchema, shirtSizeSchema, validateIdentityFields, parseDateOfBirth } from '@/lib/validation';
 import { submitRegistrationAction } from '@/lib/actions/publicRegistration';
+import { calculateAge, requiredParticipantType } from '@/lib/config';
 import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { Dictionary } from '@/lib/i18n/dictionaries';
 import { RegistrationDraft, emptyDraft, QuotaOverviewItem, PricingInfo, PaymentInfo } from '@/components/register/types';
@@ -18,7 +19,12 @@ import { Button } from '@/components/ui/Button';
 
 const QUESTION_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'] as const;
 
-function validateStep(step: number, draft: RegistrationDraft, dict: Dictionary): Record<string, string> {
+function validateStep(
+  step: number,
+  draft: RegistrationDraft,
+  dict: Dictionary,
+  childMaxAgeYears: number | null
+): Record<string, string> {
   const errors: Record<string, string> = {};
 
   if (step === 1) {
@@ -44,6 +50,15 @@ function validateStep(step: number, draft: RegistrationDraft, dict: Dictionary):
   if (step === 2) {
     if (!draft.participantType) errors.participantType = dict.register.race.errors.participantType;
     if (!draft.distance) errors.distance = dict.register.race.errors.distance;
+
+    const dob = parseDateOfBirth(draft.dateOfBirth);
+    if (dob && draft.participantType) {
+      const required = requiredParticipantType(calculateAge(dob), childMaxAgeYears);
+      if (required && draft.participantType !== required) {
+        errors.participantType =
+          required === 'CHILD' ? dict.register.race.errors.ageRequiresChild : dict.register.race.errors.ageRequiresAdult;
+      }
+    }
   }
 
   if (step === 3) {
@@ -102,12 +117,14 @@ export function RegistrationWizard({
   quotas,
   pricing,
   payment,
+  childMaxAgeYears = null,
   submitFn = submitRegistrationAction,
   successHrefBase = '/status',
 }: {
   quotas: QuotaOverviewItem[];
   pricing: PricingInfo;
   payment: PaymentInfo;
+  childMaxAgeYears?: number | null;
   submitFn?: (formData: FormData) => Promise<WizardSubmitResult>;
   successHrefBase?: string;
 }) {
@@ -124,7 +141,7 @@ export function RegistrationWizard({
   }
 
   function goNext() {
-    const stepErrors = validateStep(step, draft, dict);
+    const stepErrors = validateStep(step, draft, dict, childMaxAgeYears);
     setErrors(stepErrors);
     if (Object.keys(stepErrors).length > 0) return;
     setStep((s) => Math.min(6, s + 1));
@@ -164,7 +181,16 @@ export function RegistrationWizard({
       <StepIndicator step={step} />
       <div className="max-w-2xl mx-auto px-5 py-6">
         {step === 1 && <StepDetails draft={draft} update={update} errors={errors} />}
-        {step === 2 && <StepRace draft={draft} update={update} errors={errors} quotas={quotas} pricing={pricing} />}
+        {step === 2 && (
+          <StepRace
+            draft={draft}
+            update={update}
+            errors={errors}
+            quotas={quotas}
+            pricing={pricing}
+            childMaxAgeYears={childMaxAgeYears}
+          />
+        )}
         {step === 3 && <StepShirt draft={draft} update={update} errors={errors} />}
         {step === 4 && <StepHealthConsent draft={draft} update={update} errors={errors} />}
         {step === 5 && <StepPayment draft={draft} update={update} errors={errors} payment={payment} pricing={pricing} />}

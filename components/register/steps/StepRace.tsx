@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageProvider';
-import { DISTANCES, DISTANCE_LABEL, PARTICIPANT_TYPES, PARTICIPANT_TYPE_LABEL } from '@/lib/config';
+import { DISTANCES, DISTANCE_LABEL, PARTICIPANT_TYPES, PARTICIPANT_TYPE_LABEL, calculateAge, requiredParticipantType } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
+import { parseDateOfBirth } from '@/lib/validation';
 import { RegistrationDraft, QuotaOverviewItem, PricingInfo, priceFor } from '@/components/register/types';
 import { SelectableCard } from '@/components/ui/SelectableCard';
 import { Badge } from '@/components/ui/Badge';
@@ -13,15 +15,31 @@ export function StepRace({
   errors,
   quotas,
   pricing,
+  childMaxAgeYears,
 }: {
   draft: RegistrationDraft;
   update: (patch: Partial<RegistrationDraft>) => void;
   errors: Record<string, string>;
   quotas: QuotaOverviewItem[];
   pricing: PricingInfo;
+  childMaxAgeYears: number | null;
 }) {
   const { dict } = useLanguage();
   const t = dict.register.race;
+
+  const dob = parseDateOfBirth(draft.dateOfBirth);
+  const age = dob ? calculateAge(dob) : null;
+  const required = age !== null ? requiredParticipantType(age, childMaxAgeYears) : null;
+
+  // If the participant goes back and changes their date of birth such that
+  // their current selection is no longer allowed, clear it rather than
+  // silently letting an inconsistent choice through to the next step.
+  useEffect(() => {
+    if (required && draft.participantType && draft.participantType !== required) {
+      update({ participantType: null, distance: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [required]);
 
   const quotaFor = (distance: (typeof DISTANCES)[number], type: (typeof PARTICIPANT_TYPES)[number]) =>
     quotas.find((q) => q.distance === distance && q.participantType === type);
@@ -42,14 +60,25 @@ export function StepRace({
           {t.participantType} <span className="text-brand-500">*</span>
         </p>
         <div className="grid grid-cols-2 gap-3">
-          {PARTICIPANT_TYPES.map((type) => (
-            <SelectableCard
-              key={type}
-              selected={draft.participantType === type}
-              onClick={() => update({ participantType: type })}
-              title={PARTICIPANT_TYPE_LABEL[type]}
-            />
-          ))}
+          {PARTICIPANT_TYPES.map((type) => {
+            const disabledByAge = required !== null && required !== type;
+            return (
+              <SelectableCard
+                key={type}
+                disabled={disabledByAge}
+                selected={draft.participantType === type}
+                onClick={() => update({ participantType: type })}
+                title={PARTICIPANT_TYPE_LABEL[type]}
+                subtitle={
+                  disabledByAge
+                    ? type === 'CHILD'
+                      ? t.ageRequiresAdult.replace('{age}', String(age))
+                      : t.ageRequiresChild.replace('{age}', String(age)).replace('{maxAge}', String(childMaxAgeYears))
+                    : undefined
+                }
+              />
+            );
+          })}
         </div>
         {errors.participantType && <p className="text-xs font-medium text-red-600 mt-1">{errors.participantType}</p>}
       </div>

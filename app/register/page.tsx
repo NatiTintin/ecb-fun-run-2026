@@ -34,6 +34,7 @@ export default async function RegisterPage() {
           promptPayQrImageUrl: settings.promptPayQrImageUrl,
           paymentInstructions: settings.paymentInstructions,
         }}
+        childMaxAgeYears={settings.childMaxAgeYears}
       />
     </main>
   );

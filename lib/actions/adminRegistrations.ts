@@ -11,7 +11,7 @@ import {
   cancelRegistration,
   WorkflowError,
 } from '@/lib/workflow';
-import { submitRegistration, RegistrationClosedError } from '@/lib/registration';
+import { submitRegistration, RegistrationClosedError, AgeCategoryMismatchError } from '@/lib/registration';
 import { QuotaFullError } from '@/lib/quota';
 import { fullRegistrationSchema } from '@/lib/validation';
 import { AdminRole } from '@/lib/config';
@@ -162,6 +162,14 @@ export async function createManualRegistrationAction(formData: FormData): Promis
     revalidatePath('/admin');
     return { ok: true, registrationId: participant.registrationId };
   } catch (err) {
+    if (err instanceof AgeCategoryMismatchError) {
+      const t = dictionaries.en.register.race.errors;
+      return {
+        ok: false,
+        error: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
+        fieldErrors: { participantType: err.requiredType === 'CHILD' ? t.ageRequiresChild : t.ageRequiresAdult },
+      };
+    }
     if (err instanceof QuotaFullError) return { ok: false, error: 'ประเภทที่เลือกเต็มจำนวนแล้ว' };
     if (err instanceof RegistrationClosedError) return { ok: false, error: 'ระบบปิดรับสมัครแล้ว' };
     console.error('createManualRegistrationAction failed', err);

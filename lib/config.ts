@@ -42,6 +42,17 @@ export function calculateAge(dateOfBirth: Date, atDate: Date = new Date()): numb
   return age;
 }
 
+/**
+ * Which Participant Type an age is required to register as, given the
+ * admin-configured `childMaxAgeYears` — or null if no threshold has been
+ * set (in which case either type is allowed, per spec's "don't hard-code
+ * a child-age cutoff").
+ */
+export function requiredParticipantType(age: number, childMaxAgeYears: number | null): ParticipantType | null {
+  if (childMaxAgeYears == null) return null;
+  return age <= childMaxAgeYears ? 'CHILD' : 'ADULT';
+}
+
 export const SHIRT_SIZES = [
   '3XS',
   '2XS',

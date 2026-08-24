@@ -31,6 +31,7 @@ export default async function NewRegistrationPage() {
           promptPayQrImageUrl: settings.promptPayQrImageUrl,
           paymentInstructions: settings.paymentInstructions,
         }}
+        childMaxAgeYears={settings.childMaxAgeYears}
         submitFn={createManualRegistrationAction}
       />
     </div>

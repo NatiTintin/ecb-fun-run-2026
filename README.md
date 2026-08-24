@@ -85,9 +85,13 @@ Dashboard.
   UTC midnight on parse (`parseDateOfBirth`) and read back with UTC getters (`calculateAge`) — using
   local-time getters here would silently shift the stored date depending on the server's timezone.
 - **Adult/Child age check is admin-configurable, never hard-coded** (`EventSettings.childMaxAgeYears`,
-  nullable — the spec explicitly forbids baking in an age cutoff since it isn't finalized). When an
-  admin sets it, the registration detail page shows a non-blocking "Age / Category Mismatch" flag if
-  the declared category doesn't match the computed age; nothing is auto-rejected.
+  nullable — the spec explicitly forbids baking in an age cutoff since it isn't finalized; leaving it
+  blank disables the check entirely, matching the spec's original intent). Once an admin sets it:
+  - The registration wizard's Step 2 disables whichever Adult/Child option doesn't match the age
+    computed from Step 1's date of birth, with an inline explanation — enforced identically server-side
+    in `submitRegistration` (`AgeCategoryMismatchError`), not just hidden in the UI.
+  - The admin registration detail page also shows an "Age / Category Mismatch" flag for any existing
+    registration that predates the threshold being set (or was entered before this check existed).
 
 ## Language (English / Thai)
 

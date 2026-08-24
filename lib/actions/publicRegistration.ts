@@ -1,7 +1,7 @@
 'use server';
 
 import { fullRegistrationSchema, IdentityErrorCode } from '@/lib/validation';
-import { submitRegistration, RegistrationClosedError, attachPaymentSlip } from '@/lib/registration';
+import { submitRegistration, RegistrationClosedError, AgeCategoryMismatchError, attachPaymentSlip } from '@/lib/registration';
 import { QuotaFullError } from '@/lib/quota';
 import { rateLimit, clientIpFrom } from '@/lib/rateLimit';
 import { db } from '@/lib/db';
@@ -142,6 +142,14 @@ export async function submitRegistrationAction(formData: FormData): Promise<Subm
 
     return { ok: true, registrationId: participant.registrationId, statusToken: participant.statusToken };
   } catch (err) {
+    if (err instanceof AgeCategoryMismatchError) {
+      const t = dictionaries[locale].register.race.errors;
+      return {
+        ok: false,
+        error: msg.invalidData,
+        fieldErrors: { participantType: err.requiredType === 'CHILD' ? t.ageRequiresChild : t.ageRequiresAdult },
+      };
+    }
     if (err instanceof QuotaFullError) {
       return { ok: false, error: msg.quotaFull };
     }
