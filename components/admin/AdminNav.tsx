@@ -11,6 +11,7 @@ const ALL_ITEMS = [
   { href: '/admin/reports', label: 'Reports', roles: ['SUPER_ADMIN', 'REGISTRATION_STAFF'] },
   { href: '/admin/checkin', label: 'BIB Check-in', roles: ['SUPER_ADMIN', 'REGISTRATION_STAFF', 'BIB_STAFF'] },
   { href: '/admin/emails', label: 'Email Outbox', roles: ['SUPER_ADMIN'] },
+  { href: '/admin/admins', label: 'Admins', roles: ['SUPER_ADMIN'] },
   { href: '/admin/settings', label: 'Settings', roles: ['SUPER_ADMIN'] },
 ] as const;
 

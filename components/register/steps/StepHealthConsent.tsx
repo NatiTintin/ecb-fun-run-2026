@@ -14,16 +14,14 @@ function ConsentBlock({
   error,
   required,
   iConsent,
-  iDoNotConsent,
 }: {
   title: string;
   text: string;
   value: 'CONSENT' | 'NO_CONSENT' | null;
-  onChange: (v: 'CONSENT' | 'NO_CONSENT') => void;
+  onChange: (v: 'CONSENT') => void;
   error?: string;
   required?: boolean;
   iConsent: string;
-  iDoNotConsent: string;
 }) {
   return (
     <div className="rounded-2xl border border-gray-200 p-4 space-y-3">
@@ -32,26 +30,15 @@ function ConsentBlock({
         {required && <span className="text-brand-500"> *</span>}
       </p>
       <p className="text-sm text-gray-600 leading-relaxed">{text}</p>
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => onChange('CONSENT')}
-          className={`flex-1 h-11 rounded-xl border-2 font-semibold text-sm ${
-            value === 'CONSENT' ? 'bg-teal-500 border-teal-500 text-white' : 'bg-white border-gray-200 text-ink'
-          }`}
-        >
-          {iConsent}
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange('NO_CONSENT')}
-          className={`flex-1 h-11 rounded-xl border-2 font-semibold text-sm ${
-            value === 'NO_CONSENT' ? 'bg-gray-500 border-gray-500 text-white' : 'bg-white border-gray-200 text-ink'
-          }`}
-        >
-          {iDoNotConsent}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => onChange('CONSENT')}
+        className={`w-full h-11 rounded-xl border-2 font-semibold text-sm ${
+          value === 'CONSENT' ? 'bg-teal-500 border-teal-500 text-white' : 'bg-white border-gray-200 text-ink'
+        }`}
+      >
+        {iConsent}
+      </button>
       {error && <p className="text-xs font-medium text-red-600">{error}</p>}
     </div>
   );
@@ -128,7 +115,6 @@ export function StepHealthConsent({
           error={errors.healthConsent}
           required
           iConsent={t.iConsent}
-          iDoNotConsent={t.iDoNotConsent}
         />
         <ConsentBlock
           title={t.consentB.title}
@@ -137,7 +123,6 @@ export function StepHealthConsent({
           onChange={(v) => update({ marketingConsent: v })}
           error={errors.marketingConsent}
           iConsent={t.iConsent}
-          iDoNotConsent={t.iDoNotConsent}
         />
         <ConsentBlock
           title={t.consentC.title}
@@ -146,7 +131,6 @@ export function StepHealthConsent({
           onChange={(v) => update({ communicationConsent: v })}
           error={errors.communicationConsent}
           iConsent={t.iConsent}
-          iDoNotConsent={t.iDoNotConsent}
         />
       </div>
 

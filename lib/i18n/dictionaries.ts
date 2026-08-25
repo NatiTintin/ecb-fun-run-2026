@@ -168,7 +168,6 @@ const en = {
           'notifying me of my registration status, and reaching me when necessary.',
       },
       iConsent: 'I Consent',
-      iDoNotConsent: 'I Do Not Consent',
       declaration:
         'I certify that the information I provided is true, and if I answered “Yes” to any PAR-Q ' +
         'question, I understand I should consult a physician before participating, and I will inform the ' +
@@ -176,10 +175,10 @@ const en = {
       errors: {
         answerRequired: 'Please answer this question',
         ackRequired: 'Please confirm you acknowledge this advice',
-        healthConsentRequired: 'Please choose a consent option',
+        healthConsentRequired: 'Please give your consent to continue',
         healthConsentMandatory: 'Health data consent is required for safety during event participation',
-        marketingConsentRequired: 'Please choose a consent option',
-        communicationConsentRequired: 'Please choose a consent option',
+        marketingConsentRequired: 'Please give your consent to continue',
+        communicationConsentRequired: 'Please give your consent to continue',
         declarationRequired: 'Please confirm the declaration before continuing',
       },
     },
@@ -427,17 +426,16 @@ const th: Dictionary = {
           'การแจ้งสถานะการสมัคร และการติดต่อในกรณีจำเป็น',
       },
       iConsent: 'I Consent / ยินยอม',
-      iDoNotConsent: 'I Do Not Consent / ไม่ยินยอม',
       declaration:
         'ข้าพเจ้ารับรองว่าข้อมูลที่ให้ไว้เป็นความจริง และหากตอบ "ใช่" ในคำถาม PAR-Q ข้อใดข้อหนึ่ง ' +
         'ข้าพเจ้ารับทราบว่าควรปรึกษาแพทย์ก่อนเข้าร่วมกิจกรรม รวมถึงจะแจ้งผู้จัดงานหากสถานะสุขภาพมีการเปลี่ยนแปลง',
       errors: {
         answerRequired: 'กรุณาตอบคำถามข้อนี้',
         ackRequired: 'กรุณายืนยันว่ารับทราบคำแนะนำ',
-        healthConsentRequired: 'กรุณาเลือกตัวเลือกความยินยอม',
+        healthConsentRequired: 'กรุณายืนยันความยินยอม',
         healthConsentMandatory: 'จำเป็นต้องยินยอมให้เก็บข้อมูลสุขภาพเพื่อความปลอดภัยในการเข้าร่วมกิจกรรม',
-        marketingConsentRequired: 'กรุณาเลือกตัวเลือกความยินยอม',
-        communicationConsentRequired: 'กรุณาเลือกตัวเลือกความยินยอม',
+        marketingConsentRequired: 'กรุณายืนยันความยินยอม',
+        communicationConsentRequired: 'กรุณายืนยันความยินยอม',
         declarationRequired: 'กรุณายืนยันคำรับรองก่อนดำเนินการต่อ',
       },
     },

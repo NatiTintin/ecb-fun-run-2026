@@ -123,15 +123,19 @@ export const parqSchema = z.object({
 });
 
 export const consentSchema = z.object({
-  // PAR-Q health screening is mandatory for participant safety, so — unlike
-  // marketing/communication — declining this consent blocks submission.
+  // All three consents are a single acknowledge action in the UI (no
+  // decline option), so all three require the literal 'CONSENT' value.
   healthConsent: z.literal('CONSENT', {
     errorMap: () => ({
       message: 'จำเป็นต้องยินยอมให้เก็บข้อมูลสุขภาพ (PAR-Q) เพื่อความปลอดภัยในการเข้าร่วมกิจกรรม',
     }),
   }),
-  marketingConsent: z.enum(['CONSENT', 'NO_CONSENT']),
-  communicationConsent: z.enum(['CONSENT', 'NO_CONSENT']),
+  marketingConsent: z.literal('CONSENT', {
+    errorMap: () => ({ message: 'กรุณายืนยันความยินยอม' }),
+  }),
+  communicationConsent: z.literal('CONSENT', {
+    errorMap: () => ({ message: 'กรุณายืนยันความยินยอม' }),
+  }),
   // Section 7 "Participant Declaration" checkbox — always required,
   // regardless of PAR-Q answers (distinct from parqAcknowledged above).
   declarationAccepted: z.literal(true, {
