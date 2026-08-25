@@ -26,7 +26,7 @@ const en = {
   about: {
     eyebrow: 'Celebrating 60 Years',
     body:
-      'Invite a friend, neighbor, or colleague and join us on October 7 at 6:30 AM for the ECB Fun Run! ' +
+      'Invite a friend, neighbor, or colleague and join us on November 7 at 6:30 AM for the ECB Fun Run! ' +
       'Choose either our 3K or 5K route through Benjakitti Park and run, jog, or walk—solo or together ' +
       'with others.\n\nBefore and after the run, stick around at the start/finish area for morning ' +
       'coffee and light snacks from local vendors, and plenty of time to connect. Not a runner? No ' +
@@ -286,7 +286,7 @@ const th: Dictionary = {
   about: {
     eyebrow: 'ฉลองครบรอบ 60 ปี',
     body:
-      'ชวนเพื่อน เพื่อนบ้าน หรือเพื่อนร่วมงานมาร่วมงาน ECB Fun Run ในวันที่ 7 ตุลาคม เวลา 6:30 น. ' +
+      'ชวนเพื่อน เพื่อนบ้าน หรือเพื่อนร่วมงานมาร่วมงาน ECB Fun Run ในวันที่ 7 พฤศจิกายน เวลา 6:30 น. ' +
       'เลือกวิ่งระยะ 3K หรือ 5K ผ่านสวนเบญจกิติ จะวิ่ง จ๊อกกิ้ง หรือเดิน คนเดียวหรือไปด้วยกันก็ได้\n\n' +
       'ก่อนและหลังการวิ่ง แวะพักที่บริเวณจุดสตาร์ท/เส้นชัย มีกาแฟยามเช้าและของว่างเบาๆ จากร้านค้าท้องถิ่น ' +
       'พร้อมเวลาพูดคุยทำความรู้จักกัน ไม่ได้เป็นนักวิ่งก็ไม่เป็นไร มาเดินตามเส้นทางหรือมาเชียร์เพื่อนๆ ในชุมชนได้เช่นกัน',
