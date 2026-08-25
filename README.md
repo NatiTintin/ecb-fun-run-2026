@@ -118,9 +118,15 @@ Dashboard.
 
 1. **Database**: point `DATABASE_URL` at a real Postgres instance (Supabase, Neon, RDS, ...) and change
    `datasource.provider` in `prisma/schema.prisma` from `sqlite` to `postgresql`. Run
-   `npx prisma db push` (or set up migrations) and `npm run db:seed` once.
-2. **Storage**: swap `lib/storage.ts`'s `savePaymentSlip`/`readStoredFile` for S3 or Supabase Storage
-   calls. Keep the signed-URL pattern (`signedSlipUrl`) — never expose a public/direct path to a slip.
+   `npx prisma db push` (or set up migrations) and `npm run db:seed` once. On Supabase specifically, use
+   the **pooler** connection string (`aws-0-<region>.pooler.supabase.com:5432`, username
+   `postgres.<project-ref>`) — the direct-connection host is IPv6-only and unreachable from most
+   networks/serverless runtimes.
+2. **Storage**: `lib/storage.ts` already supports Supabase Storage — set `SUPABASE_URL` and
+   `SUPABASE_SERVICE_ROLE_KEY` (Project Settings > API) and create a **private** bucket named
+   `payment-slips`, and uploads switch over automatically (local disk is the fallback when those env
+   vars are unset). For S3 instead, swap the body of `savePaymentSlip`/`readStoredFile` — keep the
+   signed-URL pattern (`signedSlipUrl`), never expose a public/direct path to a slip.
 3. **Email**: set `RESEND_API_KEY` (and `EMAIL_SENDER_NAME`/reply-to via Admin Settings). Verify a
    sending domain with Resend.
 4. **Secrets**: generate real values for `SESSION_SECRET` and `FILE_TOKEN_SECRET`
