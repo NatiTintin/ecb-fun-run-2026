@@ -5,22 +5,24 @@
 // also works unchanged against SQLite for zero-setup local dev — just
 // flip `provider` back to "sqlite" and point DATABASE_URL at a file.
 //
-// DATABASE_URL/DIRECT_URL both point at Supabase's connection pooler
-// (direct connections there are IPv6-only and unreachable from most
-// networks/serverless runtimes). DATABASE_URL uses the transaction
-// pooler (port 6543, pgbouncer=true) since that's what tolerates many
-// short-lived serverless connections; DIRECT_URL uses the session
-// pooler (port 5432) because `prisma db push`/migrate need prepared
-// statement support that transaction mode doesn't provide.
+// DATABASE_URL must point at Supabase's SESSION-mode pooler (port 5432),
+// not the transaction-mode pooler (port 6543/pgbouncer) — this app relies
+// heavily on Prisma interactive transactions (db.$transaction(async tx =>
+// ...) in lib/workflow.ts and lib/registration.ts), which need a stable
+// connection across multiple statements. Transaction-mode pgbouncer can
+// hand different statements in the same transaction to different backend
+// connections, breaking it under concurrent load. Supabase's direct
+// connection host is IPv6-only and unreachable from most networks/
+// serverless runtimes, so the session pooler (not the raw direct host)
+// is the right target even outside of pgbouncer concerns.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model EventSettings {
