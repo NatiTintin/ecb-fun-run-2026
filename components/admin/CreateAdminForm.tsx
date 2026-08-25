@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
-import { createAdminAction, createAdminInitialState } from '@/lib/actions/adminUsers';
+import { createAdminAction, CreateAdminResult } from '@/lib/actions/adminUsers';
 import { inputBaseClass } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -17,8 +17,10 @@ function SubmitButton() {
   );
 }
 
+const initialState: CreateAdminResult = { ok: false };
+
 export function CreateAdminForm() {
-  const [state, formAction] = useFormState(createAdminAction, createAdminInitialState);
+  const [state, formAction] = useFormState(createAdminAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {

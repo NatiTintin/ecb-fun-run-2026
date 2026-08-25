@@ -8,9 +8,6 @@ import { ADMIN_ROLES, AdminRole } from '@/lib/config';
 
 export type CreateAdminResult = { ok: boolean; error?: string };
 
-const initialState: CreateAdminResult = { ok: false };
-export { initialState as createAdminInitialState };
-
 export async function createAdminAction(
   _prevState: CreateAdminResult,
   formData: FormData
