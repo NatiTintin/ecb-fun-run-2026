@@ -3,6 +3,12 @@
 // rules; prices/quotas/dates are NOT here — those live in EventSettings /
 // Quota rows so admins can change them without a code deploy.
 
+// Must match `basePath` in next.config.mjs. next/image doesn't reliably
+// prefix local `src` values with basePath (confirmed broken on Vercel with
+// images.unoptimized), so plain <img> tags for local assets need this
+// prepended explicitly.
+export const BASE_PATH = '/fun-run';
+
 export const DISTANCES = ['KM3', 'KM5'] as const;
 export type Distance = (typeof DISTANCES)[number];
 

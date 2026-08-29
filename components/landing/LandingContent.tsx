@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useLanguage } from '@/lib/i18n/LanguageProvider';
 import { priceFor } from '@/lib/settings';
-import { DISTANCE_LABEL, PARTICIPANT_TYPE_LABEL, Distance, ParticipantType } from '@/lib/config';
+import { BASE_PATH, DISTANCE_LABEL, PARTICIPANT_TYPE_LABEL, Distance, ParticipantType } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -51,18 +50,15 @@ export function LandingContent({
         <div className="absolute inset-0 opacity-[0.08] [background:radial-gradient(circle_at_20%_20%,white,transparent_35%),radial-gradient(circle_at_80%_60%,white,transparent_30%)]" />
 
         <div className="relative flex items-center justify-between px-5 py-5 max-w-3xl mx-auto">
-          <Image src="/logo.png" alt="ECB — 60 Years" width={40} height={40} className="h-10 w-auto" priority />
+          <img src={`${BASE_PATH}/logo.png`} alt="ECB — 60 Years" className="h-10 w-auto" />
           <LanguageSwitcher tone="dark" />
         </div>
 
         <div className="relative max-w-3xl mx-auto px-6 pb-16 sm:pb-24 text-center">
-          <Image
-            src="/logo.png"
+          <img
+            src={`${BASE_PATH}/logo.png`}
             alt="ECB — Celebrating 60 Years, Est. 1966"
-            width={140}
-            height={140}
             className="h-28 w-auto sm:h-36 mx-auto mb-6"
-            priority
           />
           <p className="uppercase tracking-[0.15em] text-sm font-semibold text-brand-300 mb-3">{dict.hero.eyebrow}</p>
           <h1 className="text-4xl sm:text-6xl font-extrabold drop-shadow-sm">{dict.hero.title}</h1>
