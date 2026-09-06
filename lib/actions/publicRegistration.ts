@@ -1,6 +1,7 @@
 'use server';
 
-import { fullRegistrationSchema, IdentityErrorCode } from '@/lib/validation';
+import { redirect } from 'next/navigation';
+import { fullRegistrationSchema, IdentityErrorCode, parseDateOfBirth } from '@/lib/validation';
 import { submitRegistration, RegistrationClosedError, AgeCategoryMismatchError, attachPaymentSlip } from '@/lib/registration';
 import { QuotaFullError } from '@/lib/quota';
 import { rateLimit, clientIpFrom } from '@/lib/rateLimit';
@@ -24,6 +25,8 @@ const SERVER_MESSAGES: Record<Locale, Record<string, string>> = {
     wrongStatus: 'Payment proof cannot be attached in the current status.',
     chooseFile: 'Please choose a payment proof file.',
     uploadFailed: 'Upload failed.',
+    lookupInvalid: 'Please enter your full name and date of birth.',
+    lookupNotFound: 'No registration found with that name and date of birth. Please double-check and try again.',
   },
   th: {
     rateLimited: 'มีการส่งคำขอถี่เกินไป กรุณาลองใหม่อีกครั้งในภายหลัง',
@@ -35,6 +38,8 @@ const SERVER_MESSAGES: Record<Locale, Record<string, string>> = {
     wrongStatus: 'ไม่สามารถแนบหลักฐานได้ในสถานะปัจจุบัน',
     chooseFile: 'กรุณาเลือกไฟล์หลักฐานการชำระเงิน',
     uploadFailed: 'อัปโหลดไม่สำเร็จ',
+    lookupInvalid: 'กรุณากรอกชื่อ-นามสกุล และวันเดือนปีเกิด',
+    lookupNotFound: 'ไม่พบข้อมูลการสมัครที่ตรงกับชื่อและวันเกิดนี้ กรุณาตรวจสอบอีกครั้ง',
   },
 };
 
@@ -191,4 +196,44 @@ export async function uploadSlipAction(
     console.error('uploadSlipAction failed', err);
     return { ok: false, error: err instanceof Error ? err.message : msg.uploadFailed };
   }
+}
+
+/**
+ * Replaces the emailed-link status page with a name + date-of-birth gate —
+ * there's no email delivery in this deployment. Redirects straight into the
+ * existing token-based /status/[token] page on a match, so that page's
+ * logic/security model (opaque token in the URL) is unchanged; this just
+ * changes how a participant arrives there. Rate-limited per IP since it's
+ * now a public lookup form rather than a link only the participant has.
+ */
+export async function lookupStatusAction(
+  _prevState: { ok: boolean; error?: string },
+  formData: FormData
+): Promise<{ ok: boolean; error?: string }> {
+  const locale = localeFrom(formData);
+  const msg = SERVER_MESSAGES[locale];
+
+  const ip = clientIpFrom(headers());
+  if (!rateLimit(`status-lookup:${ip}`, 10, 10 * 60 * 1000)) {
+    return { ok: false, error: msg.rateLimited };
+  }
+
+  const fullName = String(formData.get('fullName') ?? '').trim().replace(/\s+/g, ' ');
+  const dateOfBirthRaw = String(formData.get('dateOfBirth') ?? '');
+  const dob = parseDateOfBirth(dateOfBirthRaw);
+  if (!fullName || !dob) {
+    return { ok: false, error: msg.lookupInvalid };
+  }
+
+  // Most recent match if (rarely) more than one registration shares the
+  // same name and date of birth.
+  const participant = await db.participant.findFirst({
+    where: { fullName: { equals: fullName, mode: 'insensitive' }, dateOfBirth: dob },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!participant) {
+    return { ok: false, error: msg.lookupNotFound };
+  }
+
+  redirect(`/status/${participant.statusToken}`);
 }

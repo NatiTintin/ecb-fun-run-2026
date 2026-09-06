@@ -38,7 +38,6 @@ export default async function RegistrationDetailPage({ params }: { params: { id:
       payments: { orderBy: { createdAt: 'desc' } },
       parq: true,
       consents: true,
-      qrCode: true,
       bib: true,
       createdByAdmin: true,
       auditLogs: { orderBy: { timestamp: 'desc' }, take: 20, include: { admin: true } },
@@ -116,6 +115,12 @@ export default async function RegistrationDetailPage({ params }: { params: { id:
           <dd className="font-semibold text-ink">{participant.shirtSize}</dd>
           <dt className="text-gray-500">Fee</dt>
           <dd className="font-semibold text-ink">{formatTHB(participant.registrationFee)}</dd>
+          <dt className="text-gray-500">BIB Number</dt>
+          <dd className="font-semibold text-ink">{participant.bibNumber ?? '—'}</dd>
+          <dt className="text-gray-500">BIB Collected</dt>
+          <dd className="font-semibold text-ink">
+            {participant.bib?.collected ? `✓ ${formatThaiDate(participant.bib.collectedAt!)}` : 'ยังไม่รับ'}
+          </dd>
         </dl>
       </Card>
 

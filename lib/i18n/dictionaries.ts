@@ -12,6 +12,7 @@ const en = {
   },
   nav: {
     staffLogin: 'Staff Login',
+    checkStatus: 'Check My Registration Status',
   },
   hero: {
     eyebrow: 'Come move, connect, and celebrate with us!',
@@ -48,8 +49,8 @@ const en = {
       { title: 'Register', desc: 'Fill in your details and choose your race category' },
       { title: 'Payment', desc: 'Transfer payment and attach proof of payment' },
       { title: 'Review', desc: 'Our staff review your information and payment' },
-      { title: 'Confirmation', desc: 'Once approved, you’ll get a Confirmation Email with a QR Code' },
-      { title: 'BIB Collection', desc: 'Show your QR Code on BIB collection day' },
+      { title: 'Confirmation', desc: 'Once approved, check your status page to see your BIB number' },
+      { title: 'BIB Collection', desc: 'Show your ID card (national ID or passport) on BIB collection day' },
     ],
   },
   footer: {
@@ -74,7 +75,7 @@ const en = {
       phone: 'Phone Number',
       phoneHint: 'Thai mobile number, e.g. 081-234-5678',
       email: 'Email',
-      emailHint: 'Used to send your registration status and QR Code',
+      emailHint: 'For our records — used to contact you if needed',
       dateOfBirth: 'Date of Birth',
       dateOfBirthHint: 'Used for accident insurance, and to verify your race category',
       idType: 'ID Document',
@@ -232,8 +233,8 @@ const en = {
       heading: 'Registration Received',
       registrationId: 'Registration ID',
       body:
-        'Our staff are reviewing your information and payment proof. Once approved, you will receive a ' +
-        'Confirmation Email with a QR Code sent to your registered email.',
+        'Our staff are reviewing your information and payment proof. Once approved, save your ' +
+        'Registration ID and check your status page to see your assigned BIB number.',
       viewStatus: 'View My Registration Status',
       backToAdminList: 'Back to registrations',
     },
@@ -252,10 +253,18 @@ const en = {
     uploading: 'Uploading...',
     uploadSuccess: 'Uploaded successfully, thank you!',
     chooseFileError: 'Please choose a payment proof file',
-    qrHeading: 'QR Code for BIB Collection',
-    qrInstruction: 'Please show this QR Code on BIB collection day',
-    saveQr: 'Save QR Code',
+    bibHeading: 'Your BIB Number',
+    bibInstruction: 'Show your national ID or passport on BIB collection day to collect your BIB',
     notFound: 'Registration not found',
+  },
+  statusLookup: {
+    heading: 'Check Registration Status',
+    subheading: 'Enter the full name and date of birth you registered with',
+    fullNameLabel: 'Full Name',
+    fullNamePlaceholder: 'As entered when you registered',
+    dobLabel: 'Date of Birth',
+    submit: 'Check Status',
+    submitting: 'Checking...',
   },
 };
 
@@ -271,6 +280,7 @@ const th: Dictionary = {
   },
   nav: {
     staffLogin: 'สำหรับเจ้าหน้าที่ / Staff Login',
+    checkStatus: 'ตรวจสอบสถานะการสมัคร',
   },
   hero: {
     eyebrow: 'มาวิ่ง เชื่อมโยง และร่วมฉลองไปด้วยกัน!',
@@ -306,8 +316,8 @@ const th: Dictionary = {
       { title: 'สมัคร', desc: 'กรอกข้อมูลและเลือกประเภทการแข่งขัน' },
       { title: 'ชำระเงิน', desc: 'โอนเงินและแนบหลักฐานการชำระเงิน' },
       { title: 'ตรวจสอบ', desc: 'เจ้าหน้าที่ตรวจสอบข้อมูลและการชำระเงิน' },
-      { title: 'ยืนยันการสมัคร', desc: 'เมื่อได้รับการอนุมัติ จะได้รับ Confirmation Email พร้อม QR Code' },
-      { title: 'รับ BIB', desc: 'แสดง QR Code ในวันรับ BIB' },
+      { title: 'ยืนยันการสมัคร', desc: 'เมื่อได้รับการอนุมัติ ตรวจสอบสถานะเพื่อดูหมายเลข BIB ของท่าน' },
+      { title: 'รับ BIB', desc: 'แสดงบัตรประชาชนหรือพาสปอร์ตในวันรับ BIB' },
     ],
   },
   footer: {
@@ -332,7 +342,7 @@ const th: Dictionary = {
       phone: 'เบอร์โทรศัพท์',
       phoneHint: 'รองรับเบอร์มือถือไทย เช่น 081-234-5678',
       email: 'อีเมล',
-      emailHint: 'ใช้สำหรับส่งสถานะการสมัครและ QR Code',
+      emailHint: 'สำหรับติดต่อกลับหากจำเป็น',
       dateOfBirth: 'วันเดือนปีเกิด',
       dateOfBirthHint: 'ใช้สำหรับทำประกันอุบัติเหตุ และตรวจสอบประเภทผู้สมัคร',
       idType: 'ประเภทเอกสาร',
@@ -490,7 +500,7 @@ const th: Dictionary = {
       registrationId: 'Registration ID',
       body:
         'เจ้าหน้าที่กำลังตรวจสอบข้อมูลและหลักฐานการชำระเงิน เมื่อได้รับการอนุมัติแล้ว ' +
-        'ระบบจะส่ง Confirmation Email และ QR Code ไปยัง Email ที่ลงทะเบียนไว้',
+        'กรุณาเก็บ Registration ID ไว้ แล้วตรวจสอบสถานะเพื่อดูหมายเลข BIB ของท่าน',
       viewStatus: 'ดูสถานะการสมัครของฉัน',
       backToAdminList: 'กลับไปที่รายการผู้สมัคร',
     },
@@ -509,10 +519,18 @@ const th: Dictionary = {
     uploading: 'กำลังอัปโหลด...',
     uploadSuccess: 'อัปโหลดสำเร็จ ขอบคุณค่ะ/ครับ',
     chooseFileError: 'กรุณาเลือกไฟล์หลักฐานการชำระเงิน',
-    qrHeading: 'QR Code สำหรับรับ BIB',
-    qrInstruction: 'กรุณาแสดง QR Code นี้ในวันรับ BIB',
-    saveQr: 'Save QR Code',
+    bibHeading: 'หมายเลข BIB ของท่าน',
+    bibInstruction: 'แสดงบัตรประชาชนหรือพาสปอร์ตในวันรับ BIB เพื่อรับหมายเลขของท่าน',
     notFound: 'ไม่พบข้อมูลการสมัคร',
+  },
+  statusLookup: {
+    heading: 'ตรวจสอบสถานะการสมัคร',
+    subheading: 'กรอกชื่อ-นามสกุล และวันเดือนปีเกิดที่ใช้ลงทะเบียนไว้',
+    fullNameLabel: 'ชื่อ-นามสกุล',
+    fullNamePlaceholder: 'ตามที่กรอกไว้ตอนลงทะเบียน',
+    dobLabel: 'วันเดือนปีเกิด',
+    submit: 'ตรวจสอบสถานะ',
+    submitting: 'กำลังตรวจสอบ...',
   },
 };
 

@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/session';
 import { collectBib, WorkflowError } from '@/lib/workflow';
+import { normalizeIdNumber } from '@/lib/validation';
 import {
   Distance,
   ParticipantType,
@@ -15,6 +16,7 @@ import {
 export type CheckinLookupResult =
   | {
       ok: true;
+      participantId: string;
       registrationId: string;
       fullName: string;
       distanceLabel: string;
@@ -22,34 +24,41 @@ export type CheckinLookupResult =
       shirtSize: string;
       registrationStatusLabel: string;
       isApproved: boolean;
+      bibNumber: number | null;
       alreadyCollected: boolean;
       collectedAt: string | null;
     }
   | { ok: false; error: string };
 
-export async function lookupQrTokenAction(token: string): Promise<CheckinLookupResult> {
+export async function lookupByIdNumberAction(idNumber: string): Promise<CheckinLookupResult> {
   const session = await requireAdmin();
   if (!session) return { ok: false, error: 'Unauthorized' };
 
-  const qr = await db.qrCode.findUnique({
-    where: { token },
-    include: { participant: { include: { bib: true } } },
-  });
-  if (!qr) return { ok: false, error: 'ไม่พบ QR Code นี้ในระบบ' };
-  if (qr.status !== 'ACTIVE') return { ok: false, error: 'QR Code นี้ถูกยกเลิกแล้ว' };
+  const normalized = normalizeIdNumber(idNumber);
+  if (!normalized) return { ok: false, error: 'กรุณากรอกเลขบัตรประชาชนหรือพาสปอร์ต' };
 
-  const p = qr.participant;
+  // Most recent non-rejected/cancelled registration for this ID — handles a
+  // re-registration after an earlier rejection legitimately reusing the ID.
+  const participant = await db.participant.findFirst({
+    where: { idNumber: normalized, registrationStatus: { notIn: ['REJECTED', 'CANCELLED'] } },
+    include: { bib: true },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!participant) return { ok: false, error: 'ไม่พบข้อมูลผู้สมัครที่ตรงกับเลขนี้' };
+
   return {
     ok: true,
-    registrationId: p.registrationId,
-    fullName: p.fullName,
-    distanceLabel: DISTANCE_LABEL[p.distance as Distance],
-    participantTypeLabel: PARTICIPANT_TYPE_LABEL[p.participantType as ParticipantType],
-    shirtSize: p.shirtSize,
-    registrationStatusLabel: REGISTRATION_STATUS_LABEL[p.registrationStatus as RegistrationStatus],
-    isApproved: p.registrationStatus === 'APPROVED',
-    alreadyCollected: !!p.bib?.collected,
-    collectedAt: p.bib?.collectedAt ? p.bib.collectedAt.toISOString() : null,
+    participantId: participant.id,
+    registrationId: participant.registrationId,
+    fullName: participant.fullName,
+    distanceLabel: DISTANCE_LABEL[participant.distance as Distance],
+    participantTypeLabel: PARTICIPANT_TYPE_LABEL[participant.participantType as ParticipantType],
+    shirtSize: participant.shirtSize,
+    registrationStatusLabel: REGISTRATION_STATUS_LABEL[participant.registrationStatus as RegistrationStatus],
+    isApproved: participant.registrationStatus === 'APPROVED',
+    bibNumber: participant.bibNumber,
+    alreadyCollected: !!participant.bib?.collected,
+    collectedAt: participant.bib?.collectedAt ? participant.bib.collectedAt.toISOString() : null,
   };
 }
 
@@ -57,12 +66,12 @@ export type ConfirmBibResult =
   | { ok: true; alreadyCollected: boolean; collectedAt: string }
   | { ok: false; error: string };
 
-export async function confirmBibCollectionAction(token: string): Promise<ConfirmBibResult> {
+export async function confirmBibCollectionAction(participantId: string): Promise<ConfirmBibResult> {
   const session = await requireAdmin();
   if (!session) return { ok: false, error: 'Unauthorized' };
 
   try {
-    const result = await collectBib(token, session.adminId);
+    const result = await collectBib(participantId, session.adminId);
     return {
       ok: true,
       alreadyCollected: result.alreadyCollected,

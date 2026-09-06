@@ -1,45 +1,33 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
-import { lookupQrTokenAction, confirmBibCollectionAction, CheckinLookupResult } from '@/lib/actions/adminCheckin';
-import { extractTokenFromScan, formatThaiDateTime } from '@/lib/utils';
-import { QrScanner } from '@/components/admin/QrScanner';
+import { useState, useTransition } from 'react';
+import { lookupByIdNumberAction, confirmBibCollectionAction, CheckinLookupResult } from '@/lib/actions/adminCheckin';
+import { formatThaiDateTime } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
-type Result = (CheckinLookupResult & { token: string }) | null;
+type Result = CheckinLookupResult | null;
 
-export function CheckinPanel({ initialToken }: { initialToken?: string }) {
-  const [scanning, setScanning] = useState(false);
-  const [manualToken, setManualToken] = useState('');
+export function CheckinPanel() {
+  const [idNumber, setIdNumber] = useState('');
   const [result, setResult] = useState<Result>(null);
   const [confirmMessage, setConfirmMessage] = useState<{ tone: 'success' | 'warning'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (initialToken) lookup(initialToken);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialToken]);
-
-  function handleScan(raw: string) {
-    const token = extractTokenFromScan(raw);
-    setScanning(false);
-    lookup(token);
-  }
-
-  function lookup(token: string) {
+  function lookup() {
+    if (!idNumber.trim()) return;
     setConfirmMessage(null);
     startTransition(async () => {
-      const res = await lookupQrTokenAction(token);
-      setResult({ ...res, token });
+      const res = await lookupByIdNumberAction(idNumber.trim());
+      setResult(res);
     });
   }
 
   function confirm() {
     if (!result?.ok) return;
     startTransition(async () => {
-      const res = await confirmBibCollectionAction(result.token);
+      const res = await confirmBibCollectionAction(result.participantId);
       if (res.ok) {
         setConfirmMessage(
           res.alreadyCollected
@@ -56,7 +44,7 @@ export function CheckinPanel({ initialToken }: { initialToken?: string }) {
   function reset() {
     setResult(null);
     setConfirmMessage(null);
-    setManualToken('');
+    setIdNumber('');
   }
 
   return (
@@ -66,31 +54,24 @@ export function CheckinPanel({ initialToken }: { initialToken?: string }) {
         <p className="text-sm text-gray-500">Event Day Mode</p>
       </div>
 
-      {!result && !scanning && (
-        <div className="space-y-4">
-          <Button size="lg" fullWidth onClick={() => setScanning(true)} className="h-20 text-xl">
-            📷 SCAN QR CODE
-          </Button>
+      {!result && (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-500 text-center">
+            ขอดูบัตรประชาชน/พาสปอร์ตของผู้สมัคร แล้วกรอกเลขที่นี่
+          </p>
           <div className="flex gap-2">
             <input
-              value={manualToken}
-              onChange={(e) => setManualToken(e.target.value)}
-              placeholder="หรือกรอก Token ด้วยตนเอง"
-              className="flex-1 h-12 rounded-xl border-2 border-gray-200 px-3 text-sm focus:outline-none focus:border-brand-400"
+              value={idNumber}
+              onChange={(e) => setIdNumber(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && lookup()}
+              placeholder="เลขบัตรประชาชน / Passport"
+              autoFocus
+              className="flex-1 h-14 rounded-xl border-2 border-gray-200 px-4 text-lg focus:outline-none focus:border-brand-400"
             />
-            <Button variant="outline" disabled={!manualToken || isPending} onClick={() => lookup(manualToken.trim())}>
+            <Button size="lg" disabled={!idNumber.trim() || isPending} onClick={lookup}>
               ค้นหา
             </Button>
           </div>
-        </div>
-      )}
-
-      {scanning && (
-        <div className="space-y-3">
-          <QrScanner active={scanning} onScan={handleScan} />
-          <Button variant="outline" fullWidth onClick={() => setScanning(false)}>
-            ยกเลิกการสแกน
-          </Button>
         </div>
       )}
 
@@ -107,6 +88,13 @@ export function CheckinPanel({ initialToken }: { initialToken?: string }) {
               </p>
               <p className="text-gray-600">Shirt Size {result.shirtSize}</p>
               <Badge tone={result.isApproved ? 'success' : 'danger'}>{result.registrationStatusLabel}</Badge>
+
+              {result.isApproved && result.bibNumber != null && (
+                <div className="rounded-2xl bg-brand-50 border-2 border-brand-300 py-4">
+                  <p className="text-xs font-semibold text-brand-600 uppercase tracking-wide">BIB Number</p>
+                  <p className="text-5xl font-extrabold text-brand-700">{result.bibNumber}</p>
+                </div>
+              )}
 
               {confirmMessage ? (
                 <div
@@ -135,7 +123,7 @@ export function CheckinPanel({ initialToken }: { initialToken?: string }) {
             <p className="text-red-600 font-semibold">{result.error}</p>
           )}
           <Button variant="ghost" fullWidth onClick={reset}>
-            สแกนคนถัดไป
+            ค้นหาคนถัดไป
           </Button>
         </Card>
       )}

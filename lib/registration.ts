@@ -4,10 +4,8 @@ import { reserveQuotaSlot } from '@/lib/quota';
 import { nextRegistrationId } from '@/lib/registrationId';
 import { generateSecureToken } from '@/lib/tokens';
 import { writeAuditLog } from '@/lib/audit';
-import { sendEmail } from '@/lib/email/send';
-import { registrationReceivedEmail } from '@/lib/email/templates';
 import { savePaymentSlip } from '@/lib/storage';
-import { FullRegistrationInput, parseDateOfBirth } from '@/lib/validation';
+import { FullRegistrationInput, normalizeIdNumber, parseDateOfBirth } from '@/lib/validation';
 import { Locale } from '@/lib/i18n/dictionaries';
 import { calculateAge, requiredParticipantType, ParticipantType } from '@/lib/config';
 
@@ -23,11 +21,6 @@ export class AgeCategoryMismatchError extends Error {
     super(`Participant type must be ${requiredType} based on date of birth`);
     this.name = 'AgeCategoryMismatchError';
   }
-}
-
-export function statusUrlFor(statusToken: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  return `${base}/status/${statusToken}`;
 }
 
 export async function submitRegistration(
@@ -68,7 +61,7 @@ export async function submitRegistration(
         email: input.email,
         dateOfBirth: parseDateOfBirth(input.dateOfBirth) ?? new Date(0),
         idType: input.idType,
-        idNumber: input.idNumber.trim(),
+        idNumber: normalizeIdNumber(input.idNumber),
         participantType: input.participantType,
         distance: input.distance,
         shirtSize: input.shirtSize,
@@ -137,18 +130,6 @@ export async function submitRegistration(
 
     return created;
   });
-
-  const { subject, html } = registrationReceivedEmail({
-    locale: participant.preferredLocale as Locale,
-    fullName: participant.fullName,
-    registrationId: participant.registrationId,
-    distance: participant.distance as 'KM3' | 'KM5',
-    participantType: participant.participantType as 'ADULT' | 'CHILD',
-    shirtSize: participant.shirtSize,
-    fee: participant.registrationFee,
-    statusUrl: statusUrlFor(participant.statusToken),
-  });
-  await sendEmail({ to: participant.email, subject, html, kind: 'RECEIVED', participantId: participant.id });
 
   return participant;
 }

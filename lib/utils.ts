@@ -43,17 +43,6 @@ export function fromBangkokInputValue(value: string): Date {
   return new Date(`${value}:00+07:00`);
 }
 
-/** Extracts the opaque token from a scanned QR URL, tolerating a bare token too. */
-export function extractTokenFromScan(scanned: string): string {
-  try {
-    const url = new URL(scanned);
-    const parts = url.pathname.split('/').filter(Boolean);
-    return parts[parts.length - 1] ?? scanned;
-  } catch {
-    return scanned.trim();
-  }
-}
-
 export function formatThaiDateTime(date: Date) {
   return new Intl.DateTimeFormat('th-TH', {
     day: 'numeric',

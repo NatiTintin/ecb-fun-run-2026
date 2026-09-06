@@ -1,17 +1,9 @@
 import { db } from '@/lib/db';
 import { writeAuditLog } from '@/lib/audit';
 import { adjustQuotaForStatusChange } from '@/lib/quota';
-import { newQrToken, qrCodeDataUrl } from '@/lib/qr';
-import { sendEmail } from '@/lib/email/send';
-import {
-  paymentIssueEmail,
-  paymentReminderEmail,
-  registrationApprovedEmail,
-} from '@/lib/email/templates';
-import { statusUrlFor } from '@/lib/registration';
+import { nextBibNumber } from '@/lib/bib';
 import { Distance, ParticipantType, RegistrationStatus } from '@/lib/config';
 import { getEventSettings } from '@/lib/settings';
-import { Locale } from '@/lib/i18n/dictionaries';
 
 export class WorkflowError extends Error {}
 
@@ -87,15 +79,6 @@ export async function flagPaymentIssue(participantId: string, adminId: string, r
       note: reason,
     });
   });
-
-  const { subject, html } = paymentIssueEmail({
-    locale: participant.preferredLocale as Locale,
-    fullName: participant.fullName,
-    registrationId: participant.registrationId,
-    reason,
-    statusUrl: statusUrlFor(participant.statusToken),
-  });
-  await sendEmail({ to: participant.email, subject, html, kind: 'PAYMENT_ISSUE', participantId });
 }
 
 export async function sendPaymentReminder(participantId: string, adminId: string) {
@@ -119,15 +102,6 @@ export async function sendPaymentReminder(participantId: string, adminId: string
   } else {
     await writeAuditLog(db, { adminId, participantId, action: 'PAYMENT_REMINDER_SENT' });
   }
-
-  const { subject, html } = paymentReminderEmail({
-    locale: participant.preferredLocale as Locale,
-    fullName: participant.fullName,
-    registrationId: participant.registrationId,
-    fee: participant.registrationFee,
-    statusUrl: statusUrlFor(participant.statusToken),
-  });
-  await sendEmail({ to: participant.email, subject, html, kind: 'PAYMENT_REMINDER', participantId });
 }
 
 export async function approveRegistration(participantId: string, adminId: string) {
@@ -144,7 +118,6 @@ export async function approveRegistration(participantId: string, adminId: string
     throw new WorkflowError('กรุณา Verify Payment ก่อน Approve Registration');
   }
 
-  const token = newQrToken();
   const previousStatus = participant.registrationStatus;
 
   await db.$transaction(async (tx) => {
@@ -155,33 +128,20 @@ export async function approveRegistration(participantId: string, adminId: string
       'APPROVED',
       tx
     );
+    const bibNumber = await nextBibNumber(participant.distance as Distance, tx);
     await tx.participant.update({
       where: { id: participantId },
-      data: { registrationStatus: 'APPROVED' },
+      data: { registrationStatus: 'APPROVED', bibNumber },
     });
-    await tx.qrCode.create({ data: { participantId, token, status: 'ACTIVE' } });
     await tx.bibCollection.create({ data: { participantId, collected: false } });
     await writeAuditLog(tx, {
       adminId,
       participantId,
       action: 'REGISTRATION_APPROVED',
       previousValue: { registrationStatus: previousStatus },
-      newValue: { registrationStatus: 'APPROVED' },
+      newValue: { registrationStatus: 'APPROVED', bibNumber },
     });
   });
-
-  const qrDataUrl = await qrCodeDataUrl(token);
-  const { subject, html } = registrationApprovedEmail({
-    locale: participant.preferredLocale as Locale,
-    fullName: participant.fullName,
-    registrationId: participant.registrationId,
-    distance: participant.distance as Distance,
-    participantType: participant.participantType as ParticipantType,
-    shirtSize: participant.shirtSize,
-    qrCodeDataUrl: qrDataUrl,
-    statusUrl: statusUrlFor(participant.statusToken),
-  });
-  await sendEmail({ to: participant.email, subject, html, kind: 'APPROVED', participantId });
 }
 
 export async function rejectRegistration(participantId: string, adminId: string, reason: string) {
@@ -238,30 +198,31 @@ export async function cancelRegistration(participantId: string, adminId: string,
   });
 }
 
-export async function collectBib(token: string, adminId: string) {
-  const qr = await db.qrCode.findUnique({ where: { token }, include: { participant: true } });
-  if (!qr) throw new WorkflowError('QR Code ไม่ถูกต้อง');
-  if (qr.status !== 'ACTIVE') throw new WorkflowError('QR Code นี้ถูกยกเลิกแล้ว');
+export async function collectBib(participantId: string, adminId: string) {
+  const participant = await getParticipantOrThrow(participantId);
+  if (participant.registrationStatus !== 'APPROVED') {
+    throw new WorkflowError('การสมัครนี้ยังไม่ได้รับการอนุมัติ ไม่สามารถรับ BIB ได้');
+  }
 
-  const bib = await db.bibCollection.findUnique({ where: { participantId: qr.participantId } });
+  const bib = await db.bibCollection.findUnique({ where: { participantId } });
   if (bib?.collected) {
-    return { alreadyCollected: true as const, participant: qr.participant, collectedAt: bib.collectedAt };
+    return { alreadyCollected: true as const, participant, collectedAt: bib.collectedAt };
   }
 
   await db.$transaction(async (tx) => {
     await tx.bibCollection.upsert({
-      where: { participantId: qr.participantId },
-      create: { participantId: qr.participantId, collected: true, collectedAt: new Date(), collectedById: adminId },
+      where: { participantId },
+      create: { participantId, collected: true, collectedAt: new Date(), collectedById: adminId },
       update: { collected: true, collectedAt: new Date(), collectedById: adminId },
     });
     await writeAuditLog(tx, {
       adminId,
-      participantId: qr.participantId,
+      participantId,
       action: 'BIB_COLLECTED',
     });
   });
 
-  return { alreadyCollected: false as const, participant: qr.participant, collectedAt: new Date() };
+  return { alreadyCollected: false as const, participant, collectedAt: new Date() };
 }
 
 /**

@@ -17,7 +17,6 @@ import { formatTHB } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { SlipUploadForm } from '@/components/register/SlipUploadForm';
-import { SaveQrButton } from '@/components/register/SaveQrButton';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 function statusTone(status: RegistrationStatus) {
@@ -37,7 +36,7 @@ export function StatusContent({
   registrationStatus,
   paymentStatus,
   canUploadSlip,
-  qrDataUrl,
+  bibNumber,
 }: {
   token: string;
   registrationId: string;
@@ -49,7 +48,7 @@ export function StatusContent({
   registrationStatus: RegistrationStatus;
   paymentStatus: PaymentStatus;
   canUploadSlip: boolean;
-  qrDataUrl: string | null;
+  bibNumber: number | null;
 }) {
   const { dict, locale } = useLanguage();
   const t = dict.status;
@@ -108,13 +107,11 @@ export function StatusContent({
           </Card>
         )}
 
-        {qrDataUrl && (
-          <Card className="text-center space-y-3">
-            <h2 className="font-bold text-ink">{t.qrHeading}</h2>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrDataUrl} alt="QR Code" className="w-56 h-56 mx-auto rounded-xl border border-gray-200" />
-            <p className="text-sm text-gray-500">{t.qrInstruction}</p>
-            <SaveQrButton dataUrl={qrDataUrl} filename={`${registrationId}-qr.png`} />
+        {bibNumber != null && (
+          <Card className="text-center space-y-2">
+            <h2 className="font-bold text-ink">{t.bibHeading}</h2>
+            <p className="text-5xl font-extrabold text-brand-600">{bibNumber}</p>
+            <p className="text-sm text-gray-500">{t.bibInstruction}</p>
           </Card>
         )}
       </div>

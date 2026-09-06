@@ -147,6 +147,11 @@ export function LandingContent({
         </p>
         {lineContact && <p>LINE: {lineContact}</p>}
         <p className="pt-2">
+          <Link href="/status" className="underline hover:text-brand-600">
+            {dict.nav.checkStatus}
+          </Link>
+        </p>
+        <p>
           <Link href="/admin/login" className="underline hover:text-brand-600">
             {dict.nav.staffLogin}
           </Link>

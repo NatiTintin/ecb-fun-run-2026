@@ -58,6 +58,20 @@ async function main() {
     });
   }
 
+  // BIB numbers start at 5001/3001 — seed nextNumber one below so the first
+  // atomic increment (see lib/bib.ts) yields the intended starting value.
+  const bibStarts: Array<{ distance: string; nextNumber: number }> = [
+    { distance: 'KM5', nextNumber: 5000 },
+    { distance: 'KM3', nextNumber: 3000 },
+  ];
+  for (const b of bibStarts) {
+    await db.bibSequence.upsert({
+      where: { distance: b.distance },
+      update: {},
+      create: b,
+    });
+  }
+
   const adminEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@ecbfunrun.example').toLowerCase();
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe123!';
   const passwordHash = await bcrypt.hash(adminPassword, 12);

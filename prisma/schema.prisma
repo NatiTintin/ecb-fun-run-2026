@@ -86,6 +86,14 @@ model Quota {
   @@unique([distance, participantType])
 }
 
+// Per-distance (not per participant-type) running counter for BIB numbers —
+// 5KM starts at 5001, 3KM at 3001, assigned atomically on approval via the
+// same UPDATE ... RETURNING pattern as Quota.nextSequence (see lib/bib.ts).
+model BibSequence {
+  distance   String @id // KM3 | KM5
+  nextNumber Int
+}
+
 model Admin {
   id           String   @id @default(cuid())
   name         String
@@ -122,6 +130,11 @@ model Participant {
   // Bearer token for the participant's secure, no-login status page.
   statusToken     String   @unique
 
+  // Assigned on approval — sequential per distance (5001.., 3001..), read
+  // out by BIB Staff at check-in after looking the participant up by
+  // idNumber. Null until approved.
+  bibNumber Int? @unique
+
   // Section 7 "Participant Declaration" checkbox — distinct from the PAR-Q
   // section 6 acknowledgement stored on ParqResponse.
   declarationAccepted   Boolean  @default(false)
@@ -142,10 +155,15 @@ model Participant {
   payments   Payment[]
   parq       ParqResponse?
   consents   Consent[]
-  qrCode     QrCode?
   bib        BibCollection?
   auditLogs  AuditLog[]
   emailLogs  EmailLog[]
+
+  // Looked up by BIB Staff at check-in (see lib/actions/adminCheckin.ts) and
+  // by participants on the name+DOB status lookup — not unique, since a
+  // re-registration after rejection can legitimately reuse the same ID.
+  @@index([idNumber])
+  @@index([fullName, dateOfBirth])
 }
 
 model Payment {
@@ -193,14 +211,6 @@ model Consent {
   consentedAt   DateTime @default(now())
 
   @@index([participantId])
-}
-
-model QrCode {
-  participantId String   @id
-  participant   Participant @relation(fields: [participantId], references: [id])
-  token         String   @unique
-  generatedAt   DateTime @default(now())
-  status        String   @default("ACTIVE") // ACTIVE | REVOKED
 }
 
 model BibCollection {

@@ -42,6 +42,17 @@ export function parseDateOfBirth(value: string): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/**
+ * Strips spaces/dashes so ID numbers compare consistently regardless of how
+ * a participant or staff member typed them (e.g. a Thai ID card shows
+ * "1-2345-67890-12-3", but people type it with or without the dashes).
+ * Applied both when storing idNumber at registration and when BIB Staff
+ * search for it at check-in, so lookups always match.
+ */
+export function normalizeIdNumber(raw: string): string {
+  return raw.trim().replace(/[\s-]/g, '');
+}
+
 /** Standard Thai national ID mod-11 checksum (13 digits). */
 export function isValidThaiNationalId(id: string): boolean {
   if (!/^\d{13}$/.test(id)) return false;
@@ -89,7 +100,7 @@ export function validateIdentityFields(input: {
   const idNumber = input.idNumber.trim();
   if (!idNumber) {
     errors.idNumber = 'ID_REQUIRED';
-  } else if (input.idType === 'THAI_ID' && !isValidThaiNationalId(idNumber.replace(/[\s-]/g, ''))) {
+  } else if (input.idType === 'THAI_ID' && !isValidThaiNationalId(normalizeIdNumber(idNumber))) {
     errors.idNumber = 'ID_INVALID_THAI';
   } else if (input.idType === 'PASSPORT' && !PASSPORT_RE.test(idNumber)) {
     errors.idNumber = 'ID_INVALID_PASSPORT';
