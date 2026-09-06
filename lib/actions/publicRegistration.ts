@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { fullRegistrationSchema, IdentityErrorCode, parseDateOfBirth } from '@/lib/validation';
+import { fullRegistrationSchema, IdentityErrorCode, normalizeIdNumber, parseDateOfBirth } from '@/lib/validation';
 import { submitRegistration, RegistrationClosedError, AgeCategoryMismatchError, attachPaymentSlip } from '@/lib/registration';
 import { QuotaFullError } from '@/lib/quota';
 import { rateLimit, clientIpFrom } from '@/lib/rateLimit';
@@ -199,12 +199,15 @@ export async function uploadSlipAction(
 }
 
 /**
- * Replaces the emailed-link status page with a name + date-of-birth gate —
- * there's no email delivery in this deployment. Redirects straight into the
- * existing token-based /status/[token] page on a match, so that page's
- * logic/security model (opaque token in the URL) is unchanged; this just
- * changes how a participant arrives there. Rate-limited per IP since it's
- * now a public lookup form rather than a link only the participant has.
+ * Replaces the emailed-link status page with an ID number + date-of-birth
+ * gate — there's no email delivery in this deployment. Redirects straight
+ * into the existing token-based /status/[token] page on a match, so that
+ * page's logic/security model (opaque token in the URL) is unchanged; this
+ * just changes how a participant arrives there. Uses the same ID number
+ * BIB Staff search by at check-in, rather than full name, since it's a
+ * cleaner identifier (no spelling/spacing ambiguity). Rate-limited per IP
+ * since it's now a public lookup form rather than a link only the
+ * participant has.
  */
 export async function lookupStatusAction(
   _prevState: { ok: boolean; error?: string },
@@ -218,17 +221,17 @@ export async function lookupStatusAction(
     return { ok: false, error: msg.rateLimited };
   }
 
-  const fullName = String(formData.get('fullName') ?? '').trim().replace(/\s+/g, ' ');
+  const idNumber = normalizeIdNumber(String(formData.get('idNumber') ?? ''));
   const dateOfBirthRaw = String(formData.get('dateOfBirth') ?? '');
   const dob = parseDateOfBirth(dateOfBirthRaw);
-  if (!fullName || !dob) {
+  if (!idNumber || !dob) {
     return { ok: false, error: msg.lookupInvalid };
   }
 
   // Most recent match if (rarely) more than one registration shares the
-  // same name and date of birth.
+  // same ID number and date of birth.
   const participant = await db.participant.findFirst({
-    where: { fullName: { equals: fullName, mode: 'insensitive' }, dateOfBirth: dob },
+    where: { idNumber, dateOfBirth: dob },
     orderBy: { createdAt: 'desc' },
   });
   if (!participant) {

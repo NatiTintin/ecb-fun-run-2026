@@ -39,8 +39,8 @@ export function StatusLookupForm() {
           <form action={formAction} className="space-y-4">
             <input type="hidden" name="locale" value={locale} />
             <label className="block space-y-1">
-              <span className="text-sm font-medium text-gray-600">{t.fullNameLabel}</span>
-              <input name="fullName" type="text" required placeholder={t.fullNamePlaceholder} className={inputBaseClass()} />
+              <span className="text-sm font-medium text-gray-600">{t.idNumberLabel}</span>
+              <input name="idNumber" type="text" required placeholder={t.idNumberPlaceholder} className={inputBaseClass()} />
             </label>
             <label className="block space-y-1">
               <span className="text-sm font-medium text-gray-600">{t.dobLabel}</span>
