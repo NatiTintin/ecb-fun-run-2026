@@ -3,7 +3,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { signFileToken, verifyFileToken } from '@/lib/tokens';
-import { ALLOWED_SLIP_MIME_TYPES, MAX_SLIP_SIZE_BYTES } from '@/lib/config';
+import { ALLOWED_SLIP_MIME_TYPES, BASE_PATH, MAX_SLIP_SIZE_BYTES } from '@/lib/config';
 
 const SLIP_BUCKET = 'payment-slips';
 
@@ -81,7 +81,7 @@ export async function readStoredFile(storageKey: string): Promise<Buffer> {
 /** Time-limited signed URL for viewing a private slip — never a raw path. */
 export function signedSlipUrl(storageKey: string, ttlMs = 15 * 60 * 1000): string {
   const token = signFileToken(storageKey, Date.now() + ttlMs);
-  return `/api/files/slip?token=${encodeURIComponent(token)}`;
+  return `${BASE_PATH}/api/files/slip?token=${encodeURIComponent(token)}`;
 }
 
 export function resolveSlipToken(token: string) {

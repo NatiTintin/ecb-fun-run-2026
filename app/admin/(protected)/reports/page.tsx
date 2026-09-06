@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { DISTANCES, PARTICIPANT_TYPES, SHIRT_SIZES, DISTANCE_LABEL, PARTICIPANT_TYPE_LABEL, Distance, ParticipantType } from '@/lib/config';
+import { BASE_PATH, DISTANCES, PARTICIPANT_TYPES, SHIRT_SIZES, DISTANCE_LABEL, PARTICIPANT_TYPE_LABEL, Distance, ParticipantType } from '@/lib/config';
 import { formatTHB } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 function ExportLink({ type }: { type: string }) {
   return (
     <a
-      href={`/api/admin/reports/export?type=${type}`}
+      href={`${BASE_PATH}/api/admin/reports/export?type=${type}`}
       className="inline-flex items-center h-9 px-3 rounded-lg bg-ink text-white text-xs font-semibold hover:bg-gray-700"
     >
       Export CSV / Excel
