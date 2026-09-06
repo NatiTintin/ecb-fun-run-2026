@@ -195,7 +195,7 @@ const en = {
         'Our staff are still preparing the bank transfer details. You can continue registering now and ' +
         'attach payment proof later from your registration status page.',
       slipHeading: 'Payment Slip',
-      slipHint: 'JPG, PNG, or PDF, up to 8 MB (you may attach this later)',
+      slipHint: 'JPG, PNG, or PDF, up to 8 MB',
       slipTypeError: 'Only JPG, PNG, or PDF files are supported',
       slipSizeError: 'File size must not exceed 8 MB',
       slipReady: 'ready to attach',
@@ -461,7 +461,7 @@ const th: Dictionary = {
         'เจ้าหน้าที่กำลังเตรียมข้อมูลบัญชีสำหรับการโอนเงิน กรุณาดำเนินการสมัครต่อได้ก่อน แล้วท่านสามารถแนบ' +
         'หลักฐานการชำระเงินภายหลังผ่านหน้าสถานะการสมัคร',
       slipHeading: 'แนบหลักฐานการโอนเงิน / Payment Slip',
-      slipHint: 'รองรับ JPG, PNG, PDF ขนาดไม่เกิน 8 MB (สามารถแนบภายหลังได้)',
+      slipHint: 'รองรับ JPG, PNG, PDF ขนาดไม่เกิน 8 MB',
       slipTypeError: 'รองรับเฉพาะไฟล์ JPG, PNG หรือ PDF เท่านั้น',
       slipSizeError: 'ขนาดไฟล์ต้องไม่เกิน 8 MB',
       slipReady: 'พร้อมแนบ',
