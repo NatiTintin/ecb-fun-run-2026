@@ -66,16 +66,28 @@ export function LandingContent({
 
           <div className="mt-8 flex flex-col items-center gap-3">
             {windowBadge}
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                fullWidth
-                disabled={windowState !== 'OPEN'}
-                className="!bg-white !text-navy-800 hover:!bg-white/90 shadow-xl"
-              >
-                {dict.hero.cta}
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  fullWidth
+                  disabled={windowState !== 'OPEN'}
+                  className="!bg-white !text-navy-800 hover:!bg-white/90 shadow-xl"
+                >
+                  {dict.hero.cta}
+                </Button>
+              </Link>
+              <Link href="/status" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  fullWidth
+                  variant="ghost"
+                  className="!bg-transparent !text-white border-2 border-white/40 hover:!bg-white/10"
+                >
+                  {dict.nav.checkStatus}
+                </Button>
+              </Link>
+            </div>
             <p className="text-sm text-white/85">{dict.hero.registrationPeriod}</p>
           </div>
         </div>
