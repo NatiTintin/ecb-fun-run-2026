@@ -41,6 +41,7 @@ const en = {
     available: 'Available',
     almostFull: 'Almost Full',
     full: 'FULL',
+    childAgeLimit: 'Under {maxAge} years old',
   },
   howItWorks: {
     title: 'How It Works',
@@ -332,6 +333,7 @@ const th: Dictionary = {
     available: 'เปิดรับสมัคร',
     almostFull: 'ใกล้เต็มแล้ว',
     full: 'เต็ม',
+    childAgeLimit: 'อายุต่ำกว่า {maxAge} ปี',
   },
   howItWorks: {
     title: 'ขั้นตอนการสมัคร',

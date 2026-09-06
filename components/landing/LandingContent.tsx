@@ -25,6 +25,7 @@ export function LandingContent({
   organizerEmail,
   organizerPhone,
   lineContact,
+  childMaxAgeYears,
 }: {
   windowState: 'UPCOMING' | 'OPEN' | 'CLOSED';
   quotas: QuotaOverviewItem[];
@@ -32,6 +33,7 @@ export function LandingContent({
   organizerEmail: string;
   organizerPhone: string;
   lineContact: string;
+  childMaxAgeYears: number | null;
 }) {
   const { dict } = useLanguage();
 
@@ -118,6 +120,11 @@ export function LandingContent({
                   </h3>
                   <Badge tone={tone}>{label}</Badge>
                 </div>
+                {participantType === 'CHILD' && childMaxAgeYears != null && (
+                  <p className="text-xs font-semibold text-gray-400 -mt-1">
+                    ({dict.raceOptions.childAgeLimit.replace('{maxAge}', String(childMaxAgeYears))})
+                  </p>
+                )}
                 <p className="text-3xl font-extrabold text-brand-600">{formatTHB(price)}</p>
                 <div className="text-sm text-gray-500 space-y-0.5">
                   <p>

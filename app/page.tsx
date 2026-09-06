@@ -24,6 +24,7 @@ export default async function LandingPage() {
       organizerEmail={settings.organizerEmail}
       organizerPhone={settings.organizerPhone}
       lineContact={settings.lineContact}
+      childMaxAgeYears={settings.childMaxAgeYears}
     />
   );
 }
