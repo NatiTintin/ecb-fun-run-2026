@@ -23,12 +23,22 @@ async function getParticipantOrThrow(participantId: string) {
 
 export async function verifyPayment(participantId: string, adminId: string) {
   const participant = await getParticipantOrThrow(participantId);
+  const latestPayment = await db.payment.findFirst({
+    where: { participantId },
+    orderBy: { createdAt: 'desc' },
+  });
 
   await db.$transaction(async (tx) => {
     await tx.payment.create({
       data: {
         participantId,
         amount: participant.registrationFee,
+        // Carry the slip forward — this is a new status-transition row, not
+        // a new upload, so losing slipUrl here would make the slip vanish
+        // from the admin UI (which reads only the latest Payment row) the
+        // moment a payment is verified.
+        slipUrl: latestPayment?.slipUrl,
+        uploadedAt: latestPayment?.uploadedAt,
         paymentStatus: 'VERIFIED',
         verifiedAt: new Date(),
         verifiedById: adminId,
@@ -46,12 +56,20 @@ export async function verifyPayment(participantId: string, adminId: string) {
 export async function flagPaymentIssue(participantId: string, adminId: string, reason: string) {
   const participant = await getParticipantOrThrow(participantId);
   const previousStatus = participant.registrationStatus;
+  const latestPayment = await db.payment.findFirst({
+    where: { participantId },
+    orderBy: { createdAt: 'desc' },
+  });
 
   await db.$transaction(async (tx) => {
     await tx.payment.create({
       data: {
         participantId,
         amount: participant.registrationFee,
+        // Carry the slip forward (see verifyPayment) — staff need to see
+        // the slip that's actually causing the issue, not "no proof".
+        slipUrl: latestPayment?.slipUrl,
+        uploadedAt: latestPayment?.uploadedAt,
         paymentStatus: 'PAYMENT_ISSUE',
         issueReason: reason,
       },
