@@ -43,14 +43,17 @@ export function parseDateOfBirth(value: string): Date | null {
 }
 
 /**
- * Strips spaces/dashes so ID numbers compare consistently regardless of how
- * a participant or staff member typed them (e.g. a Thai ID card shows
- * "1-2345-67890-12-3", but people type it with or without the dashes).
- * Applied both when storing idNumber at registration and when BIB Staff
- * search for it at check-in, so lookups always match.
+ * Strips spaces/dashes and upper-cases so ID numbers compare consistently
+ * regardless of how a participant or staff member typed them — a Thai ID
+ * card shows "1-2345-67890-12-3" but people type it with or without the
+ * dashes, and passport numbers are conventionally uppercase but Postgres
+ * string matching is case-sensitive, so a lowercase-typed passport
+ * wouldn't otherwise match a stored uppercase one at check-in. Applied
+ * both when storing idNumber at registration and when BIB Staff search
+ * for it at check-in, so lookups always match.
  */
 export function normalizeIdNumber(raw: string): string {
-  return raw.trim().replace(/[\s-]/g, '');
+  return raw.trim().replace(/[\s-]/g, '').toUpperCase();
 }
 
 /** Standard Thai national ID mod-11 checksum (13 digits). */
