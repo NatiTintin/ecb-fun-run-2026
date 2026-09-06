@@ -133,6 +133,55 @@ export function LandingContent({
         </div>
       </section>
 
+      <section className="bg-gradient-to-b from-brand-50 to-white border-y border-gray-100">
+        <div className="max-w-2xl mx-auto px-5 py-14">
+          <h2 className="text-2xl font-extrabold text-ink text-center mb-1">{dict.timeline.title}</h2>
+          <p className="text-center text-gray-500 mb-10">{dict.timeline.subtitle}</p>
+
+          <div className="relative">
+            <div className="absolute left-3 top-3 bottom-3 w-0.5 bg-brand-200" />
+            <div className="space-y-8">
+              <div className="relative pl-10">
+                <div className="absolute left-0 top-0.5 w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-bold">
+                  1
+                </div>
+                <p className="text-xs font-bold text-brand-600 uppercase tracking-wide">{dict.timeline.registration.label}</p>
+                <p className="text-lg font-semibold text-ink mt-0.5">{dict.timeline.registration.value}</p>
+              </div>
+
+              <div className="relative pl-10">
+                <div className="absolute left-0 top-0.5 w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-bold">
+                  2
+                </div>
+                <p className="text-xs font-bold text-brand-600 uppercase tracking-wide">{dict.timeline.bibCollection.label}</p>
+                <p className="text-lg font-semibold text-ink mt-0.5">{dict.timeline.bibCollection.value}</p>
+                <p className="text-sm text-gray-500">{dict.timeline.bibCollection.location}</p>
+              </div>
+
+              <div className="relative pl-10">
+                <div className="absolute left-0 top-0.5 w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-bold">
+                  3
+                </div>
+                <p className="text-xs font-bold text-brand-600 uppercase tracking-wide">{dict.timeline.eventDay.label}</p>
+                <p className="text-lg font-semibold text-ink mt-0.5 mb-3">{dict.timeline.eventDay.value}</p>
+                <Card className="!p-0 overflow-hidden">
+                  <div className="divide-y divide-gray-100">
+                    {dict.timeline.eventDay.agenda.map((item) => (
+                      <div key={item.time} className="flex items-center gap-4 px-4 py-2.5">
+                        <span className="text-sm font-mono font-semibold text-brand-600 w-32 flex-shrink-0">
+                          {item.time}
+                        </span>
+                        <span className="text-sm text-ink">{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-white border-y border-gray-100">
         <div className="max-w-4xl mx-auto px-5 py-12">
           <h2 className="text-2xl font-extrabold text-ink text-center mb-1">{dict.howItWorks.title}</h2>

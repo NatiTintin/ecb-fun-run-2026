@@ -53,6 +53,30 @@ const en = {
       { title: 'BIB Collection', desc: 'Show your ID card (national ID or passport) on BIB collection day' },
     ],
   },
+  timeline: {
+    title: 'Session Timeline',
+    subtitle: 'Key dates from registration to race day',
+    registration: {
+      label: 'Registration Period',
+      value: '13 September – 18 October 2026',
+    },
+    bibCollection: {
+      label: 'BIB Collection',
+      value: '18 & 25 September and 1 October 2026',
+      location: 'At ECB Church',
+    },
+    eventDay: {
+      label: 'Event Day',
+      value: 'Saturday, 7 November 2026',
+      agenda: [
+        { time: '06:00 – 07:00', desc: 'Check-in' },
+        { time: '07:00 – 07:10', desc: '5 KM starts' },
+        { time: '07:20 – 07:30', desc: '3 KM starts' },
+        { time: '07:30', desc: 'First runners to finish line' },
+        { time: '07:30 – 10:00', desc: 'Food & refreshments + activities' },
+      ],
+    },
+  },
   footer: {
     contact: 'Questions? Contact us:',
   },
@@ -319,6 +343,30 @@ const th: Dictionary = {
       { title: 'ยืนยันการสมัคร', desc: 'เมื่อได้รับการอนุมัติ ตรวจสอบสถานะเพื่อดูหมายเลข BIB ของท่าน' },
       { title: 'รับ BIB', desc: 'แสดงบัตรประชาชนหรือพาสปอร์ตในวันรับ BIB' },
     ],
+  },
+  timeline: {
+    title: 'ไทม์ไลน์งาน',
+    subtitle: 'กำหนดการสำคัญตั้งแต่เปิดรับสมัครจนถึงวันงาน',
+    registration: {
+      label: 'ช่วงเปิดรับสมัคร',
+      value: '13 กันยายน – 18 ตุลาคม 2569',
+    },
+    bibCollection: {
+      label: 'วันรับ BIB',
+      value: '18 และ 25 กันยายน และ 1 ตุลาคม 2569',
+      location: 'ที่ ECB Church',
+    },
+    eventDay: {
+      label: 'วันจัดงาน',
+      value: 'วันเสาร์ที่ 7 พฤศจิกายน 2569',
+      agenda: [
+        { time: '06:00 – 07:00', desc: 'ลงทะเบียน (Check-in)' },
+        { time: '07:00 – 07:10', desc: 'ปล่อยตัวระยะ 5 กม.' },
+        { time: '07:20 – 07:30', desc: 'ปล่อยตัวระยะ 3 กม.' },
+        { time: '07:30', desc: 'นักวิ่งกลุ่มแรกเข้าเส้นชัย' },
+        { time: '07:30 – 10:00', desc: 'อาหารว่าง เครื่องดื่ม และกิจกรรม' },
+      ],
+    },
   },
   footer: {
     contact: 'สอบถามข้อมูลเพิ่มเติม:',
