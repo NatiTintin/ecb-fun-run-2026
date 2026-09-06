@@ -220,6 +220,9 @@ model BibCollection {
   collectedAt   DateTime?
   collectedById String?
   collectedBy   Admin?   @relation(fields: [collectedById], references: [id])
+  // Base64 PNG data URI captured on BIB Staff's device at collection —
+  // proof the participant (or their representative) picked up their BIB.
+  signatureData String?
 }
 
 model AuditLog {

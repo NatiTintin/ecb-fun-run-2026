@@ -182,6 +182,10 @@ export const PARQ_QUESTIONS = [
 export const ALLOWED_SLIP_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
 export const MAX_SLIP_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
 
+// BIB-collection signature — a hand-drawn canvas PNG, so a generous cap is
+// still tiny compared to a photo (guards against a pathological data URI).
+export const MAX_SIGNATURE_SIZE_BYTES = 300 * 1024; // 300 KB
+
 export function distanceCode(distance: Distance): '3' | '5' {
   return distance === 'KM3' ? '3' : '5';
 }

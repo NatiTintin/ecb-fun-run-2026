@@ -198,10 +198,13 @@ export async function cancelRegistration(participantId: string, adminId: string,
   });
 }
 
-export async function collectBib(participantId: string, adminId: string) {
+export async function collectBib(participantId: string, adminId: string, signatureData: string) {
   const participant = await getParticipantOrThrow(participantId);
   if (participant.registrationStatus !== 'APPROVED') {
     throw new WorkflowError('การสมัครนี้ยังไม่ได้รับการอนุมัติ ไม่สามารถรับ BIB ได้');
+  }
+  if (!signatureData) {
+    throw new WorkflowError('กรุณาให้ผู้รับ BIB เซ็นชื่อก่อนยืนยัน');
   }
 
   const bib = await db.bibCollection.findUnique({ where: { participantId } });
@@ -212,8 +215,8 @@ export async function collectBib(participantId: string, adminId: string) {
   await db.$transaction(async (tx) => {
     await tx.bibCollection.upsert({
       where: { participantId },
-      create: { participantId, collected: true, collectedAt: new Date(), collectedById: adminId },
-      update: { collected: true, collectedAt: new Date(), collectedById: adminId },
+      create: { participantId, collected: true, collectedAt: new Date(), collectedById: adminId, signatureData },
+      update: { collected: true, collectedAt: new Date(), collectedById: adminId, signatureData },
     });
     await writeAuditLog(tx, {
       adminId,

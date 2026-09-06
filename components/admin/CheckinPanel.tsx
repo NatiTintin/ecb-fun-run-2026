@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { lookupByIdNumberAction, confirmBibCollectionAction, CheckinLookupResult } from '@/lib/actions/adminCheckin';
 import { formatThaiDateTime } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { SignaturePad, SignaturePadHandle } from '@/components/admin/SignaturePad';
 
 type Result = CheckinLookupResult | null;
 
@@ -13,7 +14,9 @@ export function CheckinPanel() {
   const [idNumber, setIdNumber] = useState('');
   const [result, setResult] = useState<Result>(null);
   const [confirmMessage, setConfirmMessage] = useState<{ tone: 'success' | 'warning'; text: string } | null>(null);
+  const [hasSignature, setHasSignature] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const signaturePadRef = useRef<SignaturePadHandle>(null);
 
   function lookup() {
     if (!idNumber.trim()) return;
@@ -26,8 +29,13 @@ export function CheckinPanel() {
 
   function confirm() {
     if (!result?.ok) return;
+    const signatureData = signaturePadRef.current?.getDataUrl();
+    if (!signatureData) {
+      setConfirmMessage({ tone: 'warning', text: 'กรุณาให้ผู้รับ BIB เซ็นชื่อก่อนยืนยัน' });
+      return;
+    }
     startTransition(async () => {
-      const res = await confirmBibCollectionAction(result.participantId);
+      const res = await confirmBibCollectionAction(result.participantId, signatureData);
       if (res.ok) {
         setConfirmMessage(
           res.alreadyCollected
@@ -45,6 +53,8 @@ export function CheckinPanel() {
     setResult(null);
     setConfirmMessage(null);
     setIdNumber('');
+    setHasSignature(false);
+    signaturePadRef.current?.clear();
   }
 
   return (
@@ -112,9 +122,24 @@ export function CheckinPanel() {
                   )}
                 </div>
               ) : result.isApproved ? (
-                <Button size="lg" fullWidth disabled={isPending} onClick={confirm}>
-                  CONFIRM BIB COLLECTION
-                </Button>
+                <div className="space-y-3 text-left">
+                  <p className="text-sm font-semibold text-ink text-center">กรุณาให้ผู้รับ BIB เซ็นชื่อ</p>
+                  <SignaturePad ref={signaturePadRef} onChange={setHasSignature} />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        signaturePadRef.current?.clear();
+                        setHasSignature(false);
+                      }}
+                    >
+                      ล้างลายเซ็น
+                    </Button>
+                    <Button size="lg" fullWidth disabled={isPending || !hasSignature} onClick={confirm}>
+                      CONFIRM BIB COLLECTION
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <p className="text-sm text-red-600">การสมัครนี้ยังไม่ได้รับการอนุมัติ ไม่สามารถรับ BIB ได้</p>
               )}

@@ -11,6 +11,7 @@ import {
   DISTANCE_LABEL,
   PARTICIPANT_TYPE_LABEL,
   REGISTRATION_STATUS_LABEL,
+  MAX_SIGNATURE_SIZE_BYTES,
 } from '@/lib/config';
 
 export type CheckinLookupResult =
@@ -66,12 +67,22 @@ export type ConfirmBibResult =
   | { ok: true; alreadyCollected: boolean; collectedAt: string }
   | { ok: false; error: string };
 
-export async function confirmBibCollectionAction(participantId: string): Promise<ConfirmBibResult> {
+export async function confirmBibCollectionAction(
+  participantId: string,
+  signatureData: string
+): Promise<ConfirmBibResult> {
   const session = await requireAdmin();
   if (!session) return { ok: false, error: 'Unauthorized' };
 
+  if (!signatureData.startsWith('data:image/png;base64,')) {
+    return { ok: false, error: 'กรุณาให้ผู้รับ BIB เซ็นชื่อก่อนยืนยัน' };
+  }
+  if (signatureData.length > MAX_SIGNATURE_SIZE_BYTES) {
+    return { ok: false, error: 'ลายเซ็นมีขนาดใหญ่เกินไป กรุณาลองใหม่' };
+  }
+
   try {
-    const result = await collectBib(participantId, session.adminId);
+    const result = await collectBib(participantId, session.adminId, signatureData);
     return {
       ok: true,
       alreadyCollected: result.alreadyCollected,
