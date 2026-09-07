@@ -43,6 +43,18 @@ const en = {
     full: 'FULL',
     childAgeLimit: 'Under {maxAge} years old',
   },
+  whatsIncluded: {
+    title: "What You'll Get",
+    subtitle: 'Every registration includes',
+    shirt: {
+      label: 'Event T-Shirt',
+      desc: '60th Anniversary commemorative tee',
+    },
+    bag: {
+      label: 'Tote Bag',
+      desc: 'Canvas tote bag with event print',
+    },
+  },
   howItWorks: {
     title: 'How It Works',
     subtitle: 'From registration to race day',
@@ -334,6 +346,18 @@ const th: Dictionary = {
     almostFull: 'ใกล้เต็มแล้ว',
     full: 'เต็ม',
     childAgeLimit: 'อายุต่ำกว่า {maxAge} ปี',
+  },
+  whatsIncluded: {
+    title: 'สิ่งที่จะได้รับ',
+    subtitle: 'ทุกการลงทะเบียนจะได้รับ',
+    shirt: {
+      label: 'เสื้อที่ระลึก',
+      desc: 'เสื้อที่ระลึกฉลองครบรอบ 60 ปี',
+    },
+    bag: {
+      label: 'กระเป๋าผ้า',
+      desc: 'กระเป๋าผ้าแคนวาสลายงาน',
+    },
   },
   howItWorks: {
     title: 'ขั้นตอนการสมัคร',

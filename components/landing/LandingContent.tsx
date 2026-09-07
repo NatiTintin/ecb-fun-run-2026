@@ -140,6 +140,37 @@ export function LandingContent({
         </div>
       </section>
 
+      <section className="bg-white border-y border-gray-100">
+        <div className="max-w-4xl mx-auto px-5 py-12">
+          <h2 className="text-2xl font-extrabold text-ink text-center mb-1">{dict.whatsIncluded.title}</h2>
+          <p className="text-center text-gray-500 mb-6">{dict.whatsIncluded.subtitle}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="flex flex-col items-center text-center gap-3">
+              <img
+                src={`${BASE_PATH}/tee.webp`}
+                alt={dict.whatsIncluded.shirt.label}
+                className="h-48 w-auto object-contain"
+              />
+              <div>
+                <h3 className="text-lg font-bold text-ink">{dict.whatsIncluded.shirt.label}</h3>
+                <p className="text-sm text-gray-500">{dict.whatsIncluded.shirt.desc}</p>
+              </div>
+            </Card>
+            <Card className="flex flex-col items-center text-center gap-3">
+              <img
+                src={`${BASE_PATH}/tote.webp`}
+                alt={dict.whatsIncluded.bag.label}
+                className="h-48 w-auto object-contain"
+              />
+              <div>
+                <h3 className="text-lg font-bold text-ink">{dict.whatsIncluded.bag.label}</h3>
+                <p className="text-sm text-gray-500">{dict.whatsIncluded.bag.desc}</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gradient-to-b from-brand-50 to-white border-y border-gray-100">
         <div className="max-w-2xl mx-auto px-5 py-14">
           <h2 className="text-2xl font-extrabold text-ink text-center mb-1">{dict.timeline.title}</h2>
