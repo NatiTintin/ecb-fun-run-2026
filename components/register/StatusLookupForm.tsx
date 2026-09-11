@@ -33,6 +33,7 @@ export function StatusLookupForm() {
         <div className="text-center">
           <h1 className="text-2xl font-extrabold text-ink">{t.heading}</h1>
           <p className="text-sm text-gray-500 mt-1">{t.subheading}</p>
+          <p className="text-sm text-brand-600 font-medium mt-2">{t.reviewNote}</p>
         </div>
 
         <Card>

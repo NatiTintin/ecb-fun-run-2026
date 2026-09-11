@@ -19,7 +19,7 @@ const en = {
     title: 'ECB Fun Run 2026',
     dateLine: 'Saturday, 7 November 2026',
     cta: 'Register Now',
-    registrationPeriod: 'Registration period: 13 September – 18 October 2026',
+    registrationPeriod: 'Registration period: 20 September – 18 October 2026',
     statusOpen: 'Registration Open',
     statusUpcoming: 'Registration Opens Soon',
     statusClosed: 'Registration Closed',
@@ -71,11 +71,11 @@ const en = {
     subtitle: 'Key dates from registration to race day',
     registration: {
       label: 'Registration Period',
-      value: '13 September – 18 October 2026',
+      value: '20 September – 18 October 2026',
     },
     bibCollection: {
       label: 'BIB Collection',
-      value: '18 & 25 September and 1 October 2026',
+      value: '18 & 25 October and 1 November 2026',
       location: 'At ECB Church',
     },
     eventDay: {
@@ -99,7 +99,7 @@ const en = {
       closed: 'Registration Closed',
     },
     closedBody: {
-      upcoming: 'Registration opens on 13 September 2026. Please check back then.',
+      upcoming: 'Registration opens on 20 September 2026. Please check back then.',
       closed: 'Registration is now closed. Thank you for your interest in ECB Fun Run 2026.',
     },
     steps: ['Details', 'Race', 'Shirt', 'Health & Consent', 'Payment', 'Review'],
@@ -297,6 +297,7 @@ const en = {
   statusLookup: {
     heading: 'Check Registration Status',
     subheading: 'Enter the ID/passport number and date of birth you registered with',
+    reviewNote: 'Our staff typically takes 3–5 business days to review registrations.',
     idNumberLabel: 'National ID / Passport Number',
     idNumberPlaceholder: 'As entered when you registered',
     dobLabel: 'Date of Birth',
@@ -324,7 +325,7 @@ const th: Dictionary = {
     title: 'ECB Fun Run 2026',
     dateLine: 'วันเสาร์ที่ 7 พฤศจิกายน 2026',
     cta: 'สมัครวิ่งเลย',
-    registrationPeriod: 'ช่วงเปิดรับสมัคร: 13 กันยายน – 18 ตุลาคม 2026',
+    registrationPeriod: 'ช่วงเปิดรับสมัคร: 20 กันยายน – 18 ตุลาคม 2026',
     statusOpen: 'เปิดรับสมัครแล้ว',
     statusUpcoming: 'เร็วๆ นี้จะเปิดรับสมัคร',
     statusClosed: 'ปิดรับสมัครแล้ว',
@@ -375,11 +376,11 @@ const th: Dictionary = {
     subtitle: 'กำหนดการสำคัญตั้งแต่เปิดรับสมัครจนถึงวันงาน',
     registration: {
       label: 'ช่วงเปิดรับสมัคร',
-      value: '13 กันยายน – 18 ตุลาคม 2569',
+      value: '20 กันยายน – 18 ตุลาคม 2569',
     },
     bibCollection: {
       label: 'วันรับ BIB',
-      value: '18 และ 25 กันยายน และ 1 ตุลาคม 2569',
+      value: '18 และ 25 ตุลาคม และ 1 พฤศจิกายน 2569',
       location: 'ที่ ECB Church',
     },
     eventDay: {
@@ -403,7 +404,7 @@ const th: Dictionary = {
       closed: 'ปิดรับสมัครแล้ว',
     },
     closedBody: {
-      upcoming: 'ระบบจะเปิดรับสมัครวันที่ 13 กันยายน 2026 กรุณากลับมาใหม่อีกครั้ง',
+      upcoming: 'ระบบจะเปิดรับสมัครวันที่ 20 กันยายน 2026 กรุณากลับมาใหม่อีกครั้ง',
       closed: 'ขณะนี้ปิดรับสมัครแล้ว ขอบคุณที่ให้ความสนใจ ECB Fun Run 2026',
     },
     steps: ['ข้อมูลผู้สมัคร', 'ประเภทการแข่งขัน', 'ขนาดเสื้อ', 'สุขภาพและความยินยอม', 'ชำระเงิน', 'ตรวจสอบ'],
@@ -600,6 +601,7 @@ const th: Dictionary = {
   statusLookup: {
     heading: 'ตรวจสอบสถานะการสมัคร',
     subheading: 'กรอกเลขบัตรประชาชน/พาสปอร์ต และวันเดือนปีเกิดที่ใช้ลงทะเบียนไว้',
+    reviewNote: 'เจ้าหน้าที่ใช้เวลาตรวจสอบประมาณ 3-5 วันทำการ',
     idNumberLabel: 'เลขบัตรประชาชน / พาสปอร์ต',
     idNumberPlaceholder: 'ตามที่กรอกไว้ตอนลงทะเบียน',
     dobLabel: 'วันเดือนปีเกิด',
