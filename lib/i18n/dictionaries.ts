@@ -75,7 +75,7 @@ const en = {
     },
     bibCollection: {
       label: 'BIB Collection',
-      value: '18 & 25 October and 1 November 2026',
+      value: '31 October and 1 November 2026',
       location: 'At ECB Church',
     },
     eventDay: {
@@ -380,7 +380,7 @@ const th: Dictionary = {
     },
     bibCollection: {
       label: 'วันรับ BIB',
-      value: '18 และ 25 ตุลาคม และ 1 พฤศจิกายน 2569',
+      value: '31 ตุลาคม และ 1 พฤศจิกายน 2569',
       location: 'ที่ ECB Church',
     },
     eventDay: {
