@@ -14,6 +14,19 @@ import {
   MAX_SIGNATURE_SIZE_BYTES,
 } from '@/lib/config';
 
+// Short staff-facing Thai labels for the PAR-Q items — not the full question
+// text participants saw at registration (see lib/i18n/dictionaries.ts), just
+// enough for BIB staff to know what to ask about.
+const PARQ_FLAG_LABEL: Record<'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6' | 'q7', string> = {
+  q1: 'โรคหัวใจ (แพทย์วินิจฉัย)',
+  q2: 'เจ็บหน้าอกขณะออกกำลังกาย',
+  q3: 'เจ็บหน้าอกขณะพัก (เดือนที่ผ่านมา)',
+  q4: 'เวียนศีรษะ/เคยหมดสติ',
+  q5: 'ปัญหากระดูก/ข้อ',
+  q6: 'ทานยาความดัน/หัวใจ',
+  q7: 'เหตุผลสุขภาพอื่น',
+};
+
 export type CheckinLookupResult =
   | {
       ok: true;
@@ -28,6 +41,8 @@ export type CheckinLookupResult =
       bibNumber: number | null;
       alreadyCollected: boolean;
       collectedAt: string | null;
+      hasHealthFlag: boolean;
+      healthFlagItems: string[];
     }
   | { ok: false; error: string };
 
@@ -42,10 +57,16 @@ export async function lookupByIdNumberAction(idNumber: string): Promise<CheckinL
   // re-registration after an earlier rejection legitimately reusing the ID.
   const participant = await db.participant.findFirst({
     where: { idNumber: normalized, registrationStatus: { notIn: ['REJECTED', 'CANCELLED'] } },
-    include: { bib: true },
+    include: { bib: true, parq: true },
     orderBy: { createdAt: 'desc' },
   });
   if (!participant) return { ok: false, error: 'ไม่พบข้อมูลผู้สมัครที่ตรงกับเลขนี้' };
+
+  const healthFlagItems = participant.parq
+    ? (Object.keys(PARQ_FLAG_LABEL) as Array<keyof typeof PARQ_FLAG_LABEL>)
+        .filter((q) => participant.parq![q])
+        .map((q) => PARQ_FLAG_LABEL[q])
+    : [];
 
   return {
     ok: true,
@@ -60,6 +81,8 @@ export async function lookupByIdNumberAction(idNumber: string): Promise<CheckinL
     bibNumber: participant.bibNumber,
     alreadyCollected: !!participant.bib?.collected,
     collectedAt: participant.bib?.collectedAt ? participant.bib.collectedAt.toISOString() : null,
+    hasHealthFlag: participant.parq?.hasHealthFlag ?? false,
+    healthFlagItems,
   };
 }
 

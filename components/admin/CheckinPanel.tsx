@@ -99,6 +99,17 @@ export function CheckinPanel() {
               <p className="text-gray-600">Shirt Size {result.shirtSize}</p>
               <Badge tone={result.isApproved ? 'success' : 'danger'}>{result.registrationStatusLabel}</Badge>
 
+              {result.hasHealthFlag && (
+                <div className="rounded-2xl bg-red-50 border-2 border-red-400 p-4 text-left space-y-1">
+                  <p className="font-extrabold text-red-700 text-center">⚠️ มีข้อมูลสุขภาพที่ต้องระวัง</p>
+                  <ul className="text-sm text-red-700 list-disc list-inside">
+                    {result.healthFlagItems.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {result.isApproved && result.bibNumber != null && (
                 <div className="rounded-2xl bg-brand-50 border-2 border-brand-300 py-4">
                   <p className="text-xs font-semibold text-brand-600 uppercase tracking-wide">BIB Number</p>
